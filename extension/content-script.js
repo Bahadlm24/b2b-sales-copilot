@@ -156,7 +156,7 @@ function renderCaptureControl() {
   if (!control) {
     control = document.createElement("button");
     control.id = "sales-copilot-capture-control";
-    control.style.cssText = "position:fixed;z-index:2147483646;top:12px;right:12px;padding:8px 12px;border:1px solid #4c7562;border-radius:999px;background:#13221c;color:#f4f8f6;font:600 11px Arial,sans-serif;box-shadow:0 8px 25px rgba(0,0,0,.3);cursor:pointer";
+    control.style.cssText = "position:fixed;z-index:2147483646;top:12px;left:50%;transform:translateX(-50%);padding:8px 12px;border:1px solid #4c7562;border-radius:999px;background:#13221c;color:#f4f8f6;font:600 11px Arial,sans-serif;box-shadow:0 8px 25px rgba(0,0,0,.3);cursor:pointer";
     control.addEventListener("click", async () => {
       if (collecting) {
         stopCapture();

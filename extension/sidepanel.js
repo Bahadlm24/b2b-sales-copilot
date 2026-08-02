@@ -25,6 +25,8 @@ async function findMeetTab() {
   const tabs = await chrome.tabs.query({ url: ["https://meet.google.com/*", "https://teams.microsoft.com/*", "https://teams.live.com/*", "https://teams.cloud.microsoft/*", "https://*.zoom.us/*"] });
   return tabs.find((tab) => tab.active) || tabs[0] || null;
 }
+const isMeetingUrl = (url = "") => /^https:\/\/(meet\.google\.com|teams\.(microsoft|live|cloud)\.com|([^.]+\.)*zoom\.us)\//i.test(url);
+const platformFromUrl = (url = "") => url.includes("meet.google.com") ? "google-meet" : url.includes("teams.") ? "microsoft-teams" : "zoom";
 
 async function loadSettings() {
   const { settings = {} } = await chrome.storage.local.get("settings");
@@ -143,7 +145,7 @@ async function startMeeting() {
   if (!tab) return setStatus("Açık bir Meet, Teams veya Zoom toplantısı bulunamadı.", true);
   try {
     const response = await chrome.tabs.sendMessage(tab.id, { type: "START_CAPTURE" });
-    if (!response?.ok) throw new Error("Meet sayfası yakalamayı başlatamadı.");
+    if (!response?.ok) throw new Error("Toplantı sayfası yakalamayı başlatamadı.");
     activeTabId = tab.id;
     startedAt = new Date().toISOString();
     segments = [];
@@ -154,21 +156,23 @@ async function startMeeting() {
     $("startMeeting").disabled = true;
     $("stopMeeting").disabled = false;
     $("resultPanel").classList.add("hidden");
-    chrome.runtime.sendMessage({ type: "SESSION_START", session: { tabId: activeTabId, customerId: customer.id, startedAt, segments: [], qaInteractions: [], languagePreference } });
+    chrome.runtime.sendMessage({ type: "SESSION_START", session: { tabId: activeTabId, customerId: customer.id, platform: platformFromUrl(tab.url), meetingUrl: tab.url, startedAt, segments: [], qaInteractions: [], languagePreference } });
     setStatus(response.visibleCaptionNodes > 0
-      ? "Yakalama aktif. Meet altyazıları bulundu ve notlar toplanıyor."
-      : "Yakalama aktif; henüz Meet altyazısı görünmüyor. Alt menüden CC altyazılarını açın.");
-  } catch { setStatus("Google Meet sekmesini yenileyip tekrar deneyin.", true); }
+      ? "Yakalama aktif. Canlı altyazılar bulundu ve notlar toplanıyor."
+      : "Yakalama aktif; henüz canlı altyazı görünmüyor. Toplantı uygulamasından altyazıları açın.");
+  } catch { setStatus("Toplantı sekmesini yenileyip tekrar deneyin.", true); }
 }
 
 async function stopMeeting() {
   if (activeTabId) await chrome.tabs.sendMessage(activeTabId, { type: "STOP_CAPTURE" }).catch(() => {});
   const customer = selectedCustomer();
+  if (!customer) return setStatus("Toplantıyı kaydetmeden önce müşteri seçin.", true);
   const result = summarizeMeeting(segments, suggestions, languagePreference);
+  const meetingTab = activeTabId ? await chrome.tabs.get(activeTabId).catch(() => null) : null;
   const payload = {
     customerId: customer.id,
-    source: "chrome-extension-google-meet",
-    meetingUrl: activeTabId ? (await chrome.tabs.get(activeTabId).catch(() => null))?.url : null,
+    source: `chrome-extension-${platformFromUrl(meetingTab?.url)}`,
+    meetingUrl: meetingTab?.url || null,
     startedAt,
     endedAt: new Date().toISOString(),
     ownerId: null,
@@ -225,7 +229,7 @@ chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "MEETING_CAPTURE_HEALTH" && message.tabId === activeTabId && !segments.length) {
     setStatus(message.visibleCaptionNodes > 0
       ? "Altyazı alanı bulundu; konuşma metni bekleniyor."
-      : "Yakalama aktif fakat altyazı bulunamadı. Google Meet CC düğmesini açın.",
+      : "Yakalama aktif fakat altyazı bulunamadı. Toplantı uygulamasında canlı altyazıları açın.",
       message.visibleCaptionNodes === 0);
   }
 });
@@ -266,7 +270,7 @@ async function restoreSession() {
   const { activeMeetingSession } = await chrome.storage.session.get("activeMeetingSession");
   if (!activeMeetingSession) return false;
   const tab = await chrome.tabs.get(activeMeetingSession.tabId).catch(() => null);
-  if (!tab?.url?.startsWith("https://meet.google.com/")) {
+  if (!isMeetingUrl(tab?.url)) {
     await chrome.storage.session.remove("activeMeetingSession");
     return false;
   }

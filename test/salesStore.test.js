@@ -10,6 +10,24 @@ test("pipeline toplamlarını tekliflerden hesaplar", () => {
   assert.equal(salesStore.weightedPipeline.value, weighted);
 });
 
+test("toplantı takip akışı yeniden planlama turunu ve nihai sonucu saklar", () => {
+  const created = salesStore.createMeetingJourney({ entityType: "customer", entityId: 1, ownerId: 2, scheduledAt: "2026-08-10T10:00", notes: "İlk görüşme" });
+  assert.equal(created.ok, true);
+  assert.equal(created.journey.round, 1);
+  assert.equal(salesStore.updateMeetingJourney(created.journey.id, { status: "Görüşme sağlandı", result: "İkinci görüşme istendi" }).ok, true);
+  assert.equal(salesStore.updateMeetingJourney(created.journey.id, { status: "Tekrar görüşme planlandı", scheduledAt: "2026-08-12T14:00" }).ok, true);
+  assert.equal(created.journey.round, 2);
+  assert.equal(salesStore.updateMeetingJourney(created.journey.id, { status: "Olumlu", result: "Sözleşme onaylandı" }).ok, true);
+  assert.equal(created.journey.status, "Olumlu");
+  assert.equal(created.journey.history.length, 4);
+});
+
+test("nihai toplantı kararı sonuç açıklaması olmadan kapatılamaz", () => {
+  const created = salesStore.createMeetingJourney({ entityType: "customer", entityId: 1, scheduledAt: "2026-08-15T09:00" });
+  const result = salesStore.updateMeetingJourney(created.journey.id, { status: "Olumsuz", result: "" });
+  assert.equal(result.ok, false);
+});
+
 test("görev ekleme, tamamlama ve silme akışını yönetir", () => {
   salesStore.addTask({ customerId: 1, title: "Test görevi", dueDate: "2026-08-10", priority: "Orta" });
   const task = salesStore.state.tasks[0];

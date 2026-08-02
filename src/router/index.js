@@ -5,9 +5,11 @@ import CustomersView from "../views/CustomersView.vue";
 import CustomerDetailView from "../views/CustomerDetailView.vue";
 import OffersView from "../views/OffersView.vue";
 import AnalyticsView from "../views/AnalyticsView.vue";
+import SalesReportsView from "../views/SalesReportsView.vue";
 import DashboardView from "../views/DashboardView.vue";
 import TasksView from "../views/TasksView.vue";
 import MeetingHistoryView from "../views/MeetingHistoryView.vue";
+import MeetingTrackerView from "../views/MeetingTrackerView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
 import UsersView from "../views/UsersView.vue";
 import AccessDeniedView from "../views/AccessDeniedView.vue";
@@ -33,12 +35,14 @@ const router = createRouter({
         { path: "leads/:id", name: "lead-detail", component: LeadDetailView, meta: { permission: "leads" } },
         { path: "meeting", name: "meeting", component: MeetingView, meta: { permission: "meeting" } },
         { path: "meetings", name: "meeting-history", component: MeetingHistoryView, meta: { permission: "meetings" } },
+        { path: "meeting-tracker", name: "meeting-tracker", component: MeetingTrackerView, meta: { permission: "meetings" } },
         { path: "tasks", name: "tasks", component: TasksView, meta: { permission: "tasks" } },
         { path: "customers", name: "customers", component: CustomersView, meta: { permission: "customers" } },
         { path: "customers/:id", name: "customer-detail", component: CustomerDetailView, meta: { permission: "customers" } },
         { path: "offers", name: "offers", component: OffersView, meta: { permission: "offers" } },
         { path: "offers/:id", name: "offer-detail", component: OfferDetailView, meta: { permission: "offers" } },
         { path: "analytics", name: "analytics", component: AnalyticsView, meta: { permission: "analytics" } },
+        { path: "reports", name: "sales-reports", component: SalesReportsView, meta: { permission: "analytics" } },
         { path: "users", name: "users", component: UsersView, meta: { permission: "users" } },
         { path: "settings", name: "settings", component: SettingsView, meta: { permission: "settings" } },
         { path: "audit", name: "audit", component: AuditView, meta: { permission: "audit" } },

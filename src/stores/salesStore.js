@@ -5,6 +5,8 @@ import { formatPhoneNumber } from "../services/phoneFormatter.js";
 import { isTokenValid, issueTokenSession, refreshTokenSession } from "../services/tokenService.js";
 import { createAuditEntry } from "../services/auditLogger.js";
 import { isSyncDue, nextSyncTime } from "../services/syncScheduler.js";
+import { analyzeConversation, analyzeTranscript } from "../services/meetingAnalyzer.js";
+import { inboundSources, normalizeInboundLead } from "../services/inboundLeadService.js";
 
 const STORAGE_KEY = "sales-copilot-state-v1";
 let lastGeneratedId = Date.now();
@@ -52,6 +54,13 @@ const defaultActivities = [
   { id: 1, entityType: "customer", entityId: 1, actorId: 2, actorName: "Elif Demir", type: "meeting", title: "İhtiyaç analizi görüşmesi yapıldı", description: "Entegrasyon ve geçiş planı konuşuldu.", createdAt: "2026-07-28T11:30:00.000Z" },
   { id: 2, entityType: "customer", entityId: 1, actorId: 1, actorName: "Bahadır Perveli", type: "offer", title: "Teklif revizyonu istendi", description: "Entegrasyon ve eğitim kapsamı güncellenecek.", createdAt: "2026-07-29T09:15:00.000Z" },
   { id: 3, entityType: "lead", entityId: 1, actorId: 3, actorName: "Kerem Aydın", type: "call", title: "İlk arama yapıldı", description: "Karar verici bilgisi alındı, demo talep edildi.", createdAt: "2026-07-30T10:05:00.000Z" },
+];
+const defaultMeetingJourneys = [
+  { id: 101, entityType: "lead", entityId: 3, ownerId: 3, status: "Görüşme planlandı", round: 1, scheduledAt: "2026-08-04T10:00", result: "", notes: "Demo ve ihtiyaç analizi", history: [{ status: "Görüşme planlandı", at: "2026-08-01T09:00:00.000Z", round: 1 }] },
+  { id: 102, entityType: "customer", entityId: 1, ownerId: 2, status: "Tekrar görüşme planlandı", round: 2, scheduledAt: "2026-08-05T14:30", result: "", notes: "Karar verici ve entegrasyon kapsamı", history: [{ status: "Görüşme sağlandı", at: "2026-07-28T11:30:00.000Z", round: 1 }, { status: "Tekrar görüşme planlandı", at: "2026-07-29T09:15:00.000Z", round: 2 }] },
+];
+const defaultProductUpdates = [
+  { id: "0.6.0", version: "0.6.0", title: "Meet, Teams ve Zoom desteği", message: "Toplantı eklentisi çoklu platform ve otomatik başlatma desteği kazandı.", publishedAt: "2026-08-02T12:00:00.000Z" },
 ];
 
 function loadState() {
@@ -113,6 +122,17 @@ const state = reactive({
   },
   activities: Array.isArray(saved.activities) ? saved.activities : defaultActivities,
   offers: (Array.isArray(saved.offers) ? saved.offers : defaultOffers).map((item) => ({ ownerId: 2, outcomeReason: "", revisions: [], archived: false, cancelled: false, ...item })),
+  meetingJourneys: Array.isArray(saved.meetingJourneys) ? saved.meetingJourneys : defaultMeetingJourneys,
+  organization: { id: "local-demo", name: "Demo Firma", plan: "local", ...(saved.organization || {}) },
+  productUpdates: Array.isArray(saved.productUpdates) ? saved.productUpdates : defaultProductUpdates,
+  readProductUpdates: Array.isArray(saved.readProductUpdates) ? saved.readProductUpdates : [],
+  inboundSettings: {
+    baseUrl: "http://localhost:3000/api",
+    sources: Object.fromEntries(Object.keys(inboundSources).map((key) => [key, { enabled: true, token: `mock_${key}_change_me`, received: 0, lastReceivedAt: null }])),
+    logs: [],
+    ...(saved.inboundSettings || {}),
+    sources: { ...Object.fromEntries(Object.keys(inboundSources).map((key) => [key, { enabled: true, token: `mock_${key}_change_me`, received: 0, lastReceivedAt: null }])), ...(saved.inboundSettings?.sources || {}) },
+  },
   clientContext: {
     ipAddress: "127.0.0.1",
     userAgent: "local-mock",
@@ -136,6 +156,11 @@ function persist() {
     syncSettings: state.syncSettings,
     activities: state.activities,
     offers: state.offers,
+    meetingJourneys: state.meetingJourneys,
+    organization: state.organization,
+    productUpdates: state.productUpdates,
+    readProductUpdates: state.readProductUpdates,
+    inboundSettings: state.inboundSettings,
   }));
 }
 
@@ -231,6 +256,115 @@ export const salesStore = {
   userName(userId) {
     return state.users.find((user) => user.id === Number(userId))?.name || "Atanmamış";
   },
+  journeyEntityName(journey) {
+    return journey.entityType === "lead"
+      ? state.leads.find((item) => item.id === Number(journey.entityId))?.company || state.leads.find((item) => item.id === Number(journey.entityId))?.name || "Bilinmeyen lead"
+      : this.customerName(journey.entityId);
+  },
+  createMeetingJourney(data) {
+    if (!data.entityId || !data.scheduledAt) return { ok: false, message: "Kayıt ve toplantı tarihi zorunludur." };
+    const record = {
+      id: nextLocalId(), entityType: data.entityType === "lead" ? "lead" : "customer",
+      entityId: Number(data.entityId), ownerId: Number(data.ownerId) || state.currentUserId,
+      status: "Görüşme planlandı", round: 1, scheduledAt: data.scheduledAt,
+      result: "", notes: data.notes?.trim() || "", createdAt: new Date().toISOString(),
+      history: [{ status: "Görüşme planlandı", at: new Date().toISOString(), round: 1 }],
+    };
+    state.meetingJourneys.unshift(record);
+    recordActivity(record.entityType, record.entityId, "meeting", "Görüşme planlandı", `${record.scheduledAt} · ${record.notes}`);
+    audit("meeting_journey.created", "meeting_journey", record.id, { entityType: record.entityType, entityId: record.entityId, ownerId: record.ownerId });
+    persist();
+    return { ok: true, journey: record };
+  },
+  updateMeetingJourney(id, changes) {
+    const journey = state.meetingJourneys.find((item) => item.id === Number(id));
+    if (!journey) return { ok: false, message: "Takip kaydı bulunamadı." };
+    const before = { status: journey.status, scheduledAt: journey.scheduledAt, result: journey.result, notes: journey.notes, ownerId: journey.ownerId, round: journey.round };
+    const nextStatus = changes.status || journey.status;
+    if (["Olumlu", "Olumsuz"].includes(nextStatus) && !changes.result?.trim() && !journey.result?.trim()) return { ok: false, message: "Nihai karar için sonuç açıklaması zorunludur." };
+    if (nextStatus === "Tekrar görüşme planlandı" && !changes.scheduledAt) return { ok: false, message: "Yeni toplantı tarihi zorunludur." };
+    if (nextStatus === "Tekrar görüşme planlandı" && journey.status !== "Tekrar görüşme planlandı") journey.round += 1;
+    Object.assign(journey, {
+      status: nextStatus,
+      scheduledAt: changes.scheduledAt ?? journey.scheduledAt,
+      result: changes.result?.trim() ?? journey.result,
+      notes: changes.notes?.trim() ?? journey.notes,
+      ownerId: Number(changes.ownerId) || journey.ownerId,
+      updatedAt: new Date().toISOString(),
+    });
+    journey.history ||= [];
+    journey.history.push({ status: journey.status, at: journey.updatedAt, round: journey.round, result: journey.result });
+    recordActivity(journey.entityType, journey.entityId, "meeting", `Toplantı takibi: ${journey.status}`, journey.result || journey.notes);
+    audit("meeting_journey.updated", "meeting_journey", journey.id, changeDetails(before, { status: journey.status, scheduledAt: journey.scheduledAt, result: journey.result, notes: journey.notes, ownerId: journey.ownerId, round: journey.round }));
+    persist();
+    return { ok: true, journey };
+  },
+  linkJourneyToCustomer(id, customerId) {
+    const journey = state.meetingJourneys.find((item) => item.id === Number(id));
+    if (!journey || journey.entityType !== "lead") return false;
+    const before = { entityType: journey.entityType, entityId: journey.entityId };
+    journey.sourceLeadId = journey.entityId;
+    journey.entityType = "customer";
+    journey.entityId = Number(customerId);
+    audit("meeting_journey.converted", "meeting_journey", journey.id, changeDetails(before, { entityType: journey.entityType, entityId: journey.entityId }));
+    persist();
+    return true;
+  },
+  markProductUpdateRead(version) {
+    if (!state.readProductUpdates.includes(version)) state.readProductUpdates.push(version);
+    persist();
+  },
+  setInboundBaseUrl(url) {
+    if (!/^https?:\/\//i.test(url)) return false;
+    state.inboundSettings.baseUrl = url.replace(/\/$/, "");
+    audit("integration.base_url_updated", "integration", null, { baseUrl: state.inboundSettings.baseUrl });
+    persist();
+    return true;
+  },
+  toggleInboundSource(sourceKey, enabled) {
+    const source = state.inboundSettings.sources[sourceKey];
+    if (!source) return false;
+    source.enabled = Boolean(enabled);
+    audit("integration.source_toggled", "integration", sourceKey, { enabled: source.enabled });
+    persist();
+    return true;
+  },
+  rotateInboundToken(sourceKey) {
+    const source = state.inboundSettings.sources[sourceKey];
+    if (!source) return null;
+    source.token = `wh_${sourceKey}_${crypto.randomUUID().replaceAll("-", "")}`;
+    audit("integration.token_rotated", "integration", sourceKey, { rotated: true });
+    persist();
+    return source.token;
+  },
+  receiveInboundLead(sourceKey, payload, token) {
+    const config = state.inboundSettings.sources[sourceKey];
+    const receivedAt = new Date().toISOString();
+    const log = { id: nextLocalId(), sourceKey, receivedAt, status: "rejected", message: "", externalLeadId: payload?.lead_id || payload?.id || null };
+    if (!config?.enabled) log.message = "Kaynak bağlantısı pasif.";
+    else if (token !== config.token) log.message = "Webhook anahtarı geçersiz.";
+    else {
+      const lead = normalizeInboundLead(sourceKey, payload);
+      const phone = formatPhoneNumber(lead?.phone);
+      if (!phone) log.message = "Telefon alanı zorunludur.";
+      else if (state.leads.some((item) => formatPhoneNumber(item.phone) === phone) || state.customers.some((item) => formatPhoneNumber(item.phone) === phone)) log.message = "Bu telefon numarası zaten kayıtlı; mükerrer data alınmadı.";
+      else {
+        const record = this.addLead({ ...lead, phone });
+        record.inboundReceivedAt = receivedAt;
+        record.externalLeadId = lead.externalLeadId;
+        config.received += 1;
+        config.lastReceivedAt = receivedAt;
+        log.status = "accepted";
+        log.message = "Lead havuzuna eklendi.";
+        log.leadId = record.id;
+      }
+    }
+    state.inboundSettings.logs.unshift(log);
+    if (state.inboundSettings.logs.length > 200) state.inboundSettings.logs.length = 200;
+    audit("integration.webhook_received", "integration", sourceKey, { status: log.status, message: log.message, externalLeadId: log.externalLeadId }, log.status === "accepted" ? "success" : "failed");
+    persist();
+    return { ok: log.status === "accepted", message: log.message, log };
+  },
   activitiesFor(entityType, entityId) {
     return state.activities
       .filter((activity) => activity.entityType === entityType && activity.entityId === Number(entityId))
@@ -309,9 +443,11 @@ export const salesStore = {
     const before = { transcript: meeting.transcript, wordCount: meeting.wordCount };
     meeting.transcript = transcript.trim();
     meeting.wordCount = meeting.transcript.split(/\s+/).length;
+    meeting.insights = analyzeTranscript(meeting.transcript);
+    meeting.conversationAnalysis = analyzeConversation(meeting.transcript);
     meeting.updatedAt = new Date().toISOString();
     recordActivity("customer", meeting.customerId, "meeting", "Toplantı notu güncellendi", `${meeting.wordCount} kelime`);
-    audit("meeting.updated", "meeting", id, changeDetails(before, { transcript: meeting.transcript, wordCount: meeting.wordCount }));
+    audit("meeting.updated", "meeting", id, changeDetails(before, { transcript: meeting.transcript, wordCount: meeting.wordCount, overallScore: meeting.conversationAnalysis.overallScore }));
     persist();
     return true;
   },

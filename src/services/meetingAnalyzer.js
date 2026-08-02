@@ -163,3 +163,61 @@ export function buildNextMeetingPlan(transcript, insights = analyzeTranscript(tr
   plan.push("Toplantıyı sorumlusu ve tarihi belli tek bir sonraki adımla kapat.");
   return [...new Set(plan)].slice(0, 5);
 }
+
+const scoreSignals = {
+  need: ["ihtiyaç", "sorun", "problem", "zorluk", "hedef", "öncelik", "pain", "need"],
+  budget: ["bütçe", "fiyat", "maliyet", "indirim", "yatırım", "roi", "budget", "price"],
+  authority: ["karar", "onay", "yönetim", "müdür", "direktör", "komite", "yetkili", "decision"],
+  timing: ["tarih", "takvim", "ne zaman", "süre", "acil", "canlıya", "deadline", "timeline"],
+  nextStep: ["sonraki adım", "tekrar görüş", "toplantı plan", "gönderece", "dönece", "takip", "next step"],
+  competition: ["rakip", "alternatif", "başka ürün", "karşılaştır", "competitor"],
+};
+
+function countSignals(text, words) {
+  return words.reduce((total, word) => total + (text.includes(word) ? 1 : 0), 0);
+}
+
+function normalizeSegments(input) {
+  if (Array.isArray(input)) return input.map((item) => ({ speaker: item.speaker || "Konuşmacı", role: item.role || "unknown", text: String(item.text || "") })).filter((item) => item.text.trim());
+  return String(input || "").split(/\n+/).map((line) => {
+    const match = line.match(/^([^:]{1,40}):\s*(.+)$/);
+    return match ? { speaker: match[1].trim(), role: /^(siz|satış|sales|temsilci)/i.test(match[1]) ? "sales" : "participant", text: match[2].trim() } : { speaker: "Konuşmacı", role: "unknown", text: line.trim() };
+  }).filter((item) => item.text);
+}
+
+export function analyzeConversation(input) {
+  const segments = normalizeSegments(input);
+  const transcript = segments.map((item) => item.text).join(" ");
+  const normalized = transcript.toLocaleLowerCase("tr-TR");
+  const signalCounts = Object.fromEntries(Object.entries(scoreSignals).map(([key, words]) => [key, countSignals(normalized, words)]));
+  const questionCount = (transcript.match(/\?/g) || []).length + (normalized.match(/\b(ne|neden|nasıl|hangi|kim|ne zaman|kaç|how|why|what|who|when)\b/g) || []).length;
+  const commitmentCount = countSignals(normalized, ["anlaştık", "uygun", "planlayalım", "gönderin", "başlayalım", "onay", "sözleşme"]);
+  const objectionCount = countSignals(normalized, ["pahalı", "ama", "endişe", "risk", "istemiyoruz", "uygun değil", "rakip", "sorun"]);
+  const salesWords = segments.filter((item) => item.role === "sales").reduce((sum, item) => sum + item.text.split(/\s+/).length, 0);
+  const participantWords = segments.filter((item) => item.role === "participant").reduce((sum, item) => sum + item.text.split(/\s+/).length, 0);
+  const attributedWords = salesWords + participantWords;
+  const talkRatio = attributedWords ? Math.round(salesWords / attributedWords * 100) : null;
+  const dimensions = [
+    { key: "discovery", label: "İhtiyaç keşfi", score: Math.min(100, 25 + signalCounts.need * 22 + Math.min(questionCount, 4) * 8) },
+    { key: "budget", label: "Bütçe ve değer", score: Math.min(100, 20 + signalCounts.budget * 24) },
+    { key: "authority", label: "Karar süreci", score: Math.min(100, 20 + signalCounts.authority * 26) },
+    { key: "timing", label: "Zamanlama", score: Math.min(100, 20 + signalCounts.timing * 26) },
+    { key: "nextStep", label: "Sonraki adım", score: Math.min(100, 20 + signalCounts.nextStep * 28 + commitmentCount * 10) },
+    { key: "objections", label: "İtiraz yönetimi", score: objectionCount ? Math.min(100, 38 + signalCounts.budget * 10 + signalCounts.competition * 12) : 55 },
+  ];
+  const overallScore = Math.round(dimensions.reduce((sum, item) => sum + item.score, 0) / dimensions.length);
+  const risks = [];
+  if (!signalCounts.authority) risks.push("Nihai karar verici ve onay süreci netleşmedi.");
+  if (!signalCounts.budget) risks.push("Bütçe veya yatırım değerlendirme kriteri konuşulmadı.");
+  if (!signalCounts.timing) risks.push("Karar ve canlıya geçiş tarihi belirlenmedi.");
+  if (!signalCounts.nextStep) risks.push("Tarihi ve sorumlusu belli sonraki adım alınmadı.");
+  if (talkRatio !== null && talkRatio > 65) risks.push(`Satışçı konuşma oranı %${talkRatio}; müşteriye daha fazla alan açılmalı.`);
+  const strengths = dimensions.filter((item) => item.score >= 65).map((item) => `${item.label} güçlü işlendi.`);
+  if (commitmentCount) strengths.push("Müşteriden ilerleme veya aksiyon sinyali alındı.");
+  const dealHealth = overallScore >= 75 ? "Güçlü" : overallScore >= 55 ? "Takip gerekli" : "Riskli";
+  return {
+    overallScore, dealHealth, dimensions, talkRatio, salesWords, participantWords,
+    questionCount, objectionCount, commitmentCount, risks, strengths,
+    summary: `${transcript.split(/[.!?]+/).filter(Boolean).slice(0, 2).join(". ").trim()}${transcript ? "." : ""}`,
+  };
+}

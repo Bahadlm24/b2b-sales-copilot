@@ -21,6 +21,7 @@ function saveEdit(meeting) {
         <div class="meeting-history-head"><div><strong>{{ salesStore.customerName(meeting.customerId) }}</strong><small>{{ new Date(meeting.meetingDate || meeting.createdAt).toLocaleString("tr-TR") }} · {{ salesStore.userName(meeting.ownerId) }} · {{ meeting.wordCount }} kelime</small></div><div class="record-actions"><button class="secondary-button" @click="startEdit(meeting)">Düzenle</button><button class="danger-button" @click="salesStore.deleteMeeting(meeting.id)">Sil</button></div></div>
         <template v-if="editingId === meeting.id"><textarea v-model="draft" class="meeting-edit-textarea"></textarea><div class="record-actions"><button class="primary-button compact" @click="saveEdit(meeting)">Kaydet</button><button class="secondary-button" @click="editingId = null">Vazgeç</button></div></template>
         <p v-else>{{ meeting.transcript }}</p>
+        <div v-if="meeting.conversationAnalysis" class="history-score"><strong>{{ meeting.conversationAnalysis.overallScore }}/100</strong><span>{{ meeting.conversationAnalysis.dealHealth }}</span><small>{{ meeting.conversationAnalysis.risks.length }} risk · {{ meeting.conversationAnalysis.questionCount }} soru sinyali</small></div>
         <div class="history-tags"><span v-for="insight in meeting.insights" :key="insight.id">{{ insight.title }}</span></div>
       </article>
     </div>

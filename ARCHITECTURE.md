@@ -1,5 +1,7 @@
 # Mimari
 
+Toplantı satış yolculuğu ve çoklu firma dağıtım modeli için [MEETING_TRACKING.md](MEETING_TRACKING.md) belgesine bakın.
+
 ## Katmanlar
 
 ```text

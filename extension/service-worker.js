@@ -78,6 +78,15 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       chrome.storage.session.set({ activeMeetingSession: { tabId: sender.tab.id, customerId: null, platform: message.platform, meetingUrl: message.url, startedAt: new Date().toISOString(), segments: [], qaInteractions: [], languagePreference: "auto", autoStarted: true } });
     });
   }
+  if (message.type === "COACH_FEEDBACK" && sender.tab) {
+    chrome.storage.session.get("activeMeetingSession").then(({ activeMeetingSession }) => {
+      const interaction = activeMeetingSession?.qaInteractions?.find((item) => item.id === message.interactionId);
+      if (!interaction) return;
+      interaction.feedback = message.feedback;
+      interaction.feedbackAt = new Date().toISOString();
+      chrome.storage.session.set({ activeMeetingSession });
+    });
+  }
   if (message.type === "SESSION_START") {
     chrome.storage.session.set({ activeMeetingSession: message.session });
   }

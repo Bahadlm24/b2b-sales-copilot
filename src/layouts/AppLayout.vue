@@ -12,12 +12,14 @@ const titles = {
   "lead-detail": ["TALEP YÖNETİMİ", "Potansiyel Müşteri Detayı"],
   meeting: ["SATIŞ ÇALIŞMA ALANI", "Toplantı Asistanı"],
   "meeting-history": ["SATIŞ HAFIZASI", "Toplantı Geçmişi"],
+  "meeting-tracker": ["SATIŞ TAKİP MERKEZİ", "Toplantı Takibi"],
   tasks: ["AKSİYON YÖNETİMİ", "Takipler"],
   customers: ["MÜŞTERİ YÖNETİMİ", "Müşteriler"],
   "customer-detail": ["MÜŞTERİ YÖNETİMİ", "Müşteri Detayı"],
   offers: ["SATIŞ TAKİBİ", "Teklifler"],
   "offer-detail": ["SATIŞ TAKİBİ", "Teklif Detayı"],
   analytics: ["SATIŞ ZEKÂSI", "Analizler"],
+  "sales-reports": ["YÖNETİM RAPORLARI", "Satış Sonuçları"],
   users: ["SİSTEM YÖNETİMİ", "Kullanıcılar ve Roller"],
   settings: ["SİSTEM AYARLARI", "Yetki ve Organizasyon"],
   audit: ["SİSTEM KAYITLARI", "Audit ve Mail Geçmişi"],
@@ -51,8 +53,20 @@ const notifications = computed(() => {
     const days = Math.floor((today - new Date(`${customer.lastContactDate}T00:00:00`)) / 86400000);
     if (days >= 10) items.push({ id: `customer-${customer.id}`, type: "Müşteri", text: `${customer.name}: ${days} gündür temas yok`, to: `/customers/${customer.id}` });
   });
+  salesStore.state.meetingJourneys.filter((meeting) => !["Olumlu", "Olumsuz", "Görüşme sağlandı"].includes(meeting.status)).forEach((meeting) => {
+    const hours = Math.ceil((new Date(meeting.scheduledAt) - today) / 3600000);
+    if (hours >= 0 && hours <= 48) items.push({ id: `journey-${meeting.id}`, type: "Toplantı", text: `${salesStore.journeyEntityName(meeting)} görüşmesine ${hours} saat kaldı`, to: "/meeting-tracker" });
+    if (hours < 0) items.push({ id: `journey-overdue-${meeting.id}`, type: "Geciken görüşme", text: `${salesStore.journeyEntityName(meeting)} için sonuç girilmedi`, to: "/meeting-tracker" });
+  });
+  salesStore.state.productUpdates.filter((update) => !salesStore.state.readProductUpdates.includes(update.version)).forEach((update) => {
+    items.push({ id: `update-${update.version}`, type: `Güncelleme ${update.version}`, text: update.message, to: "/settings", updateVersion: update.version });
+  });
   return items.slice(0, 20);
 });
+function openNotification(item) {
+  if (item.updateVersion) salesStore.markProductUpdateRead(item.updateVersion);
+  notificationsOpen.value = false;
+}
 let tokenTimer;
 onMounted(() => {
   tokenTimer = window.setInterval(() => {
@@ -78,15 +92,18 @@ function logout() {
         <RouterLink v-if="salesStore.can('leads')" class="nav-item" to="/leads"><span>＋</span> Lead Havuzu</RouterLink>
         <RouterLink v-if="salesStore.can('meeting')" class="nav-item" to="/meeting"><span>◫</span> Toplantı</RouterLink>
         <RouterLink v-if="salesStore.can('meetings')" class="nav-item" to="/meetings"><span>≡</span> Geçmiş</RouterLink>
+        <RouterLink v-if="salesStore.can('meetings')" class="nav-item" to="/meeting-tracker"><span>▦</span> Toplantı Takibi</RouterLink>
         <RouterLink v-if="salesStore.can('tasks')" class="nav-item" to="/tasks"><span>✓</span> Takipler</RouterLink>
         <RouterLink v-if="salesStore.can('customers')" class="nav-item" to="/customers"><span>◎</span> Müşteriler</RouterLink>
         <RouterLink v-if="salesStore.can('offers')" class="nav-item" to="/offers"><span>◇</span> Teklifler</RouterLink>
         <RouterLink v-if="salesStore.can('analytics')" class="nav-item" to="/analytics"><span>↗</span> Analizler</RouterLink>
+        <RouterLink v-if="salesStore.can('analytics')" class="nav-item" to="/reports"><span>▥</span> Satış Raporları</RouterLink>
         <RouterLink v-if="salesStore.can('users')" class="nav-item" to="/users"><span>⚙</span> Kullanıcılar</RouterLink>
         <RouterLink v-if="salesStore.can('settings')" class="nav-item" to="/settings"><span>⋯</span> Ayarlar</RouterLink>
         <RouterLink v-if="salesStore.can('audit')" class="nav-item" to="/audit"><span>◷</span> Audit Log</RouterLink>
       </nav>
       <div class="sidebar-bottom">
+        <small class="organization-label">{{ salesStore.state.organization.name }}</small>
         <div class="profile">
           <span class="avatar">{{ activeUserInitials }}</span>
           <span><strong>{{ activeUser.name }}</strong><small>{{ salesStore.roleLabel(activeUser.role) }}</small></span>
@@ -115,7 +132,7 @@ function logout() {
             <button class="icon-button notification-button" aria-label="Bildirimler" @click="notificationsOpen = !notificationsOpen">●<b v-if="notifications.length">{{ notifications.length }}</b></button>
             <div v-if="notificationsOpen" class="notification-popover">
               <div class="panel-header"><strong>Bildirimler</strong><span>{{ notifications.length }}</span></div>
-              <RouterLink v-for="item in notifications" :key="item.id" :to="item.to" @click="notificationsOpen = false"><small>{{ item.type }}</small><span>{{ item.text }}</span></RouterLink>
+              <RouterLink v-for="item in notifications" :key="item.id" :to="item.to" @click="openNotification(item)"><small>{{ item.type }}</small><span>{{ item.text }}</span></RouterLink>
               <p v-if="!notifications.length">Yeni bildirim yok.</p>
             </div>
           </div>

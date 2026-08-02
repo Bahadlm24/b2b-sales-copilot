@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { analyzeTranscript, buildNextMeetingPlan } from "../src/services/meetingAnalyzer.js";
+import { analyzeConversation, analyzeTranscript, buildNextMeetingPlan } from "../src/services/meetingAnalyzer.js";
 
 test("metindeki en ilgili satış sinyallerini önceliklendirir", () => {
   const result = analyzeTranscript("Fiyat rakipten pahalı, bütçe sınırlı. Entegrasyon süresi de önemli.");
@@ -35,4 +35,22 @@ test("sonraki toplantı planını konuşmadaki sinyallere göre uyarlar", () => 
   assert.ok(plan.some((item) => item.includes("Geçiş")));
   assert.ok(plan.some((item) => item.includes("Karar verici")));
   assert.ok(plan.length <= 5);
+});
+
+test("görüşmeyi satış boyutlarına göre skorlar ve eksik riskleri gösterir", () => {
+  const analysis = analyzeConversation("Müşteri: Entegrasyon bizim için önemli ama fiyat pahalı.\nSatış: Kararı kim verecek? Ne zaman canlıya geçmek istiyorsunuz?\nMüşteri: Yönetim onayından sonra gelecek hafta tekrar görüşelim.");
+  assert.ok(analysis.overallScore > 50);
+  assert.equal(analysis.dealHealth, "Takip gerekli");
+  assert.ok(analysis.questionCount >= 2);
+  assert.ok(analysis.dimensions.some((item) => item.key === "authority" && item.score > 20));
+  assert.ok(Array.isArray(analysis.risks));
+});
+
+test("konuşmacı etiketlerinden satışçı konuşma oranını hesaplar", () => {
+  const analysis = analyzeConversation([
+    { speaker: "Temsilci", role: "sales", text: "İhtiyacınızı ve karar sürecinizi konuşalım." },
+    { speaker: "Müşteri", role: "participant", text: "Ekibimizin entegrasyon sorunu var ve üç ay içinde canlıya geçmek istiyoruz." },
+  ]);
+  assert.ok(analysis.talkRatio > 0 && analysis.talkRatio < 100);
+  assert.ok(analysis.participantWords > analysis.salesWords);
 });

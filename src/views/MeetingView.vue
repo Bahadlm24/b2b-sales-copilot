@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { initialTranscript } from "../data/mockData";
-import { analyzeTranscript, buildNextMeetingPlan } from "../services/meetingAnalyzer";
+import { analyzeConversation, analyzeTranscript, buildNextMeetingPlan } from "../services/meetingAnalyzer";
 import { salesStore } from "../stores/salesStore";
 
 const route = useRoute();
@@ -12,6 +12,7 @@ const isAnalyzing = ref(false);
 const showAnalysis = ref(true);
 const insights = ref(analyzeTranscript(initialTranscript));
 const nextMeetingPlan = ref(buildNextMeetingPlan(initialTranscript, insights.value));
+const conversationAnalysis = ref(analyzeConversation(initialTranscript));
 const savedMessage = ref("");
 const activeCustomers = computed(() => salesStore.customers.filter((item) => !item.archived));
 const selectedCustomerId = ref(Number(route.query.customer) || activeCustomers.value[0]?.id);
@@ -30,6 +31,7 @@ function analyzeMeeting() {
   window.setTimeout(() => {
     insights.value = analyzeTranscript(transcript.value);
     nextMeetingPlan.value = buildNextMeetingPlan(transcript.value, insights.value);
+    conversationAnalysis.value = analyzeConversation(transcript.value);
     salesStore.saveMeeting({
       customerId: customer.value.id,
       ownerId: selectedOwnerId.value,
@@ -37,6 +39,7 @@ function analyzeMeeting() {
       transcript: transcript.value.trim(),
       wordCount: wordCount.value,
       insights: insights.value,
+      conversationAnalysis: conversationAnalysis.value,
     });
     isAnalyzing.value = false;
     showAnalysis.value = true;
@@ -84,6 +87,15 @@ function analyzeMeeting() {
     </section>
   </div>
   <section v-if="customer && showAnalysis" class="analysis-section">
+    <section class="conversation-scorecard panel">
+      <div class="scorecard-overview"><div class="score-ring" :style="{ '--score': conversationAnalysis.overallScore }"><strong>{{ conversationAnalysis.overallScore }}</strong><span>/100</span></div><div><p class="eyebrow">FIRSAT SAĞLIĞI</p><h3>{{ conversationAnalysis.dealHealth }}</h3><p>{{ conversationAnalysis.summary || 'Özet oluşturmak için konuşma metni gerekli.' }}</p></div></div>
+      <div class="score-dimensions"><article v-for="dimension in conversationAnalysis.dimensions" :key="dimension.key"><div><span>{{ dimension.label }}</span><strong>{{ dimension.score }}</strong></div><div class="score-bar"><i :style="{ width: `${dimension.score}%` }"></i></div></article></div>
+      <div class="conversation-metrics"><span><strong>{{ conversationAnalysis.questionCount }}</strong>Soru sinyali</span><span><strong>{{ conversationAnalysis.objectionCount }}</strong>İtiraz</span><span><strong>{{ conversationAnalysis.commitmentCount }}</strong>Taahhüt</span><span><strong>{{ conversationAnalysis.talkRatio === null ? '—' : `%${conversationAnalysis.talkRatio}` }}</strong>Satışçı konuşma oranı</span></div>
+    </section>
+    <div class="coaching-findings">
+      <section class="panel"><p class="eyebrow">GÜÇLÜ NOKTALAR</p><h3>İyi yapılanlar</h3><ul><li v-for="item in conversationAnalysis.strengths" :key="item">{{ item }}</li><li v-if="!conversationAnalysis.strengths.length">Henüz güçlü kabul edilecek yeterli sinyal bulunmadı.</li></ul></section>
+      <section class="panel risk-panel"><p class="eyebrow">FIRSAT RİSKLERİ</p><h3>Eksik kalan noktalar</h3><ul><li v-for="item in conversationAnalysis.risks" :key="item">{{ item }}</li><li v-if="!conversationAnalysis.risks.length">Kritik bir eksik sinyal bulunmadı.</li></ul></section>
+    </div>
     <div class="section-title"><div><p class="eyebrow">AKILLI SATIŞ KOÇU</p><h3>Toplantı önerileri</h3></div><span>{{ insights.length }} içgörü bulundu</span></div>
     <div class="insight-grid">
       <article v-for="item in insights" :key="item.id" class="insight" :class="{ blue: item.type === 'term', amber: item.type === 'objection', green: item.type === 'question' }">
