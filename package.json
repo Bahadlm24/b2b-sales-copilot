@@ -1,0 +1,19 @@
+{
+  "name": "b2b-sales-copilot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "node --test",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "read-excel-file": "^9.3.5",
+    "vite": "^7.0.0",
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
+  }
+}

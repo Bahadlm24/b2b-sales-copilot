@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="tr">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><title>Sales Copilot</title><link rel="stylesheet" href="sidepanel.css" /></head>
+  <body>
+    <header><div><small>SALES COPILOT</small><h1>Toplantı Asistanı</h1></div><button id="settingsToggle" class="icon">⚙</button></header>
+    <section id="settingsPanel" class="card hidden">
+      <h2>Bağlantı ayarları</h2>
+      <label>Çalışma modu<select id="mode"><option value="mock">Mock / yerel</option><option value="api">API</option></select></label>
+      <label>Toplantı dili<select id="language"><option value="auto">Otomatik (TR / EN)</option><option value="tr">Türkçe öncelikli</option><option value="en">English priority</option></select></label>
+      <label class="check"><input id="autoStart" type="checkbox" /> Toplantıya girince otomatik başlat</label>
+      <label class="check"><input id="popupEnabled" type="checkbox" /> Toplantı üzerinde canlı popup göster</label>
+      <label>Popup süresi<select id="popupDuration"><option value="3000">3 saniye</option><option value="5000">5 saniye</option><option value="7000">7 saniye</option></select></label>
+      <label class="check"><input id="participantOnly" type="checkbox" /> Yalnızca katılımcı konuşmalarında popup göster</label>
+      <label>API adresi<input id="apiBaseUrl" placeholder="http://localhost:3000/api" /></label>
+      <label>Access token<input id="accessToken" type="password" placeholder="Bearer token" /></label>
+      <button id="saveSettings" class="secondary">Ayarları kaydet</button>
+    </section>
+    <section class="card">
+      <label>Müşteri ara<input id="customerSearch" placeholder="Firma veya yetkili" /></label>
+      <select id="customerSelect"><option value="">Müşteri seçin</option></select>
+      <div id="customerCard" class="customer empty">Toplantı başlamadan müşteri seçin.</div>
+    </section>
+    <section class="card consent">
+      <label class="check"><input id="consent" type="checkbox" /> Katılımcıların bilgilendirildiğini ve toplantı notlarının işlenmesine izin verildiğini onaylıyorum.</label>
+      <div class="actions"><button id="startMeeting" class="primary">Toplantıyı başlat</button><button id="stopMeeting" class="danger" disabled>Bitir ve kaydet</button></div>
+      <p id="status" class="status">Google Meet sekmesi bekleniyor.</p>
+    </section>
+    <section class="card">
+      <div class="section-title"><h2>Canlı öneriler</h2><span id="suggestionCount">0</span></div>
+      <div id="suggestions" class="list empty">Konuşma başladığında sorular burada görünecek.</div>
+    </section>
+    <section class="card">
+      <div class="section-title"><h2>Toplantı notları</h2><span id="captionCount">0</span></div>
+      <div id="captions" class="captions empty">Henüz altyazı yakalanmadı.</div>
+    </section>
+    <section class="card">
+      <div class="section-title"><h2>Soru ve cevap geçmişi</h2><span id="qaCount">0</span></div>
+      <div id="qaHistory" class="qa-history empty">Henüz soru-cevap etkileşimi yok.</div>
+    </section>
+    <section id="resultPanel" class="card hidden"><div class="section-title"><h2>Toplantı özeti</h2><span id="saveState">Bekliyor</span></div><p id="summary"></p><h3>Aksiyonlar</h3><ul id="actionsList"></ul><button id="exportJson" class="secondary">JSON dışa aktar</button></section>
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>
