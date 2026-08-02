@@ -20,6 +20,7 @@ function sampleCurl(item) { return `curl -X POST "${item.url}" -H "Content-Type:
 </script>
 
 <template>
+  <nav class="settings-tabs"><RouterLink to="/settings">Organizasyon ve yetkiler</RouterLink><RouterLink to="/integrations">API ve entegrasyonlar</RouterLink></nav>
   <section class="panel inbound-header"><div><p class="eyebrow">GELEN DATA BAĞLANTILARI</p><h3>Webhook ve Web Form API adresleri</h3><p>Reklam mecraları bu adreslere sunucudan <code>POST</code> gönderir. URL kullanıcıların tarayıcıda açacağı bir sayfa değildir.</p></div><form @submit.prevent="saveBaseUrl"><label><span>Public API temel adresi</span><input v-model="baseUrl" class="search-input" placeholder="https://api.firmaniz.com/api" /></label><button class="primary-button compact">Kaydet</button></form></section>
   <div class="integration-source-grid">
     <article v-for="item in sourceEntries" :key="item.key" class="panel integration-source-card">

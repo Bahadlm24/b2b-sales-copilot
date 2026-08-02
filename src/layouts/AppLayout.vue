@@ -26,7 +26,7 @@ const titles = {
   audit: ["SİSTEM KAYITLARI", "Audit ve Mail Geçmişi"],
   "access-denied": ["ERİŞİM KONTROLÜ", "Yetkisiz Erişim"],
 };
-const pageTitle = computed(() => titles[route.name] || ["SALES COPILOT", "Sayfa"]);
+const pageTitle = computed(() => titles[route.name] || [salesStore.state.organization.productName.toLocaleUpperCase("tr-TR"), "Sayfa"]);
 const activeUser = computed(() => salesStore.currentUser.value || {
   name: "Kullanıcı",
   role: "representative",
@@ -86,7 +86,7 @@ function logout() {
   <div class="app-shell">
     <aside class="sidebar">
       <RouterLink class="brand" to="/">
-        <span class="brand-mark">S</span><span>Sales Copilot</span>
+        <span class="brand-mark">{{ salesStore.state.organization.brandMark }}</span><span>{{ salesStore.state.organization.productName }}</span>
       </RouterLink>
       <nav class="nav" aria-label="Ana menü">
         <RouterLink class="nav-item" to="/"><span>⌂</span> Genel Bakış</RouterLink>
@@ -99,9 +99,8 @@ function logout() {
         <RouterLink v-if="salesStore.can('offers')" class="nav-item" to="/offers"><span>◇</span> Teklifler</RouterLink>
         <RouterLink v-if="salesStore.can('analytics')" class="nav-item" to="/analytics"><span>↗</span> Analizler</RouterLink>
         <RouterLink v-if="salesStore.can('analytics')" class="nav-item" to="/reports"><span>▥</span> Satış Raporları</RouterLink>
-        <RouterLink v-if="salesStore.can('users')" class="nav-item" to="/users"><span>⚙</span> Kullanıcılar</RouterLink>
-        <RouterLink v-if="salesStore.can('settings')" class="nav-item" to="/settings"><span>⋯</span> Ayarlar</RouterLink>
-        <RouterLink v-if="salesStore.can('settings')" class="nav-item" to="/integrations"><span>⇄</span> Entegrasyonlar</RouterLink>
+        <RouterLink v-if="activeUser.role === 'admin' && salesStore.can('users')" class="nav-item" to="/users"><span>⚙</span> Kullanıcılar</RouterLink>
+        <RouterLink v-if="activeUser.role === 'admin' && salesStore.can('settings')" class="nav-item" to="/settings"><span>⋯</span> Ayarlar</RouterLink>
         <RouterLink v-if="salesStore.can('audit')" class="nav-item" to="/audit"><span>◷</span> Audit Log</RouterLink>
       </nav>
       <div class="sidebar-bottom">

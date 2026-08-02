@@ -10,6 +10,15 @@ test("pipeline toplamlarını tekliflerden hesaplar", () => {
   assert.equal(salesStore.weightedPipeline.value, weighted);
 });
 
+test("firma ve ürün kimliğini dinamik olarak günceller", () => {
+  const previous = { ...salesStore.state.organization };
+  const result = salesStore.updateOrganizationBranding({ name: "Acme Satış", productName: "Acme Copilot", brandMark: "AC" });
+  assert.equal(result.ok, true);
+  assert.equal(salesStore.state.organization.productName, "Acme Copilot");
+  assert.equal(salesStore.state.organization.brandMark, "AC");
+  salesStore.updateOrganizationBranding(previous);
+});
+
 test("toplantı takip akışı yeniden planlama turunu ve nihai sonucu saklar", () => {
   const created = salesStore.createMeetingJourney({ entityType: "customer", entityId: 1, ownerId: 2, scheduledAt: "2026-08-10T10:00", notes: "İlk görüşme" });
   assert.equal(created.ok, true);

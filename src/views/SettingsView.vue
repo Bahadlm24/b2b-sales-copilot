@@ -10,6 +10,11 @@ const roleName = ref("");
 const selectedRoleKey = ref(salesStore.state.roleDefinitions[0]?.key);
 const teamForm = reactive({ name: "", departmentId: salesStore.state.departments[0]?.id || "" });
 const organizationFeedback = ref("");
+const brandingForm = reactive({
+  name: salesStore.state.organization.name,
+  productName: salesStore.state.organization.productName,
+  brandMark: salesStore.state.organization.brandMark,
+});
 const selectedUser = computed(() => salesStore.state.users.find((user) => user.id === Number(selectedUserId.value)));
 const selectedRole = computed(() => salesStore.state.roleDefinitions.find((role) => role.key === selectedRoleKey.value));
 const tokenExpiresAt = computed(() => salesStore.state.tokenSession?.expiresAt
@@ -47,10 +52,24 @@ function removeSelectedRole() {
   organizationFeedback.value = ok ? "Rol silindi." : "Kullanıcıya atanmış rol silinemez.";
   if (ok) selectedRoleKey.value = salesStore.state.roleDefinitions[0]?.key;
 }
+function saveBranding() {
+  const result = salesStore.updateOrganizationBranding(brandingForm);
+  organizationFeedback.value = result.message;
+}
 </script>
 
 <template>
   <section class="settings-grid">
+    <nav class="settings-tabs settings-wide"><RouterLink to="/settings">Organizasyon ve yetkiler</RouterLink><RouterLink to="/integrations">API ve entegrasyonlar</RouterLink></nav>
+    <article class="panel settings-wide branding-panel">
+      <div><p class="eyebrow">FİRMA VE ÜRÜN KİMLİĞİ</p><h3>Dinamik marka görünümü</h3><p class="settings-description">Ürün adı menüde, giriş ekranında ve tarayıcı sekmesinde; firma adı ise tenant alanlarında kullanılır.</p></div>
+      <form class="branding-form" @submit.prevent="saveBranding">
+        <label><span>Firma adı</span><input v-model="brandingForm.name" class="search-input" required /></label>
+        <label><span>Ürün / uygulama adı</span><input v-model="brandingForm.productName" class="search-input" required /></label>
+        <label><span>Logo harfi</span><input v-model="brandingForm.brandMark" class="search-input brand-mark-input" maxlength="3" required /></label>
+        <button class="primary-button compact">Görünümü kaydet</button>
+      </form>
+    </article>
     <article class="panel settings-wide">
       <div class="panel-header"><div><p class="eyebrow">DİNAMİK YETKİLER</p><h3>Kişi bazlı sayfa erişimi</h3></div><select v-model="selectedUserId" class="select-input user-permission-select"><option v-for="user in salesStore.state.users" :key="user.id" :value="user.id">{{ user.name }}</option></select></div>
       <p class="settings-description">Değişiklikler anında uygulanır ve tarayıcıda saklanır. İşaret kaldırıldığında kullanıcı ilgili menüyü ve rotayı kullanamaz.</p>

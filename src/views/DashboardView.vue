@@ -4,9 +4,10 @@ import { salesStore } from "../stores/salesStore";
 
 const currency = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
 const ownerFilter = ref("mine");
+const canViewTeam = computed(() => ["admin", "manager"].includes(salesStore.currentUser.value.role));
 const matchesOwner = (item) => ownerFilter.value === "all" || item.ownerId === salesStore.currentUser.value.id;
 const priorityTasks = computed(() => salesStore.openTasks.value.filter(matchesOwner).sort((a, b) => a.dueDate.localeCompare(b.dueDate)).slice(0, 4));
-const recentMeetings = computed(() => salesStore.state.meetings.filter(matchesOwner).slice(0, 3));
+const recentMeetings = computed(() => salesStore.state.meetings.filter((item) => item.ownerId === salesStore.currentUser.value.id).slice(0, 1));
 const dashboardOffers = computed(() => salesStore.activeOffers.value.filter(matchesOwner));
 const strongestOffers = computed(() => [...dashboardOffers.value].sort((a, b) => b.probability - a.probability).slice(0, 3));
 const filteredLeads = computed(() => salesStore.state.leads.filter((item) => !item.archived && matchesOwner(item)));
@@ -21,7 +22,7 @@ const filteredWeighted = computed(() => dashboardOffers.value.reduce((sum, offer
       <h2>Öncelikli fırsatlarını ilerlet.</h2>
       <p>{{ salesStore.openTasks.value.length }} açık takip ve karar aşamasında güçlü fırsatlar var.</p>
     </div>
-    <div class="dashboard-actions"><select v-model="ownerFilter" class="select-input"><option value="mine">Yalnızca bana ait</option><option value="all">Tüm ekip</option></select><RouterLink class="primary-button compact link-button lime-button" to="/meeting">Yeni analiz başlat</RouterLink></div>
+    <div class="dashboard-actions"><select v-if="canViewTeam" v-model="ownerFilter" class="select-input"><option value="mine">Yalnızca bana ait</option><option value="all">Tüm ekip</option></select><span v-else class="personal-scope">Yalnızca sana ait kayıtlar</span><RouterLink class="dashboard-analysis-button" to="/meeting">Yeni analiz başlat <b>→</b></RouterLink></div>
   </section>
 
   <section class="summary-grid dashboard-summary">
@@ -48,12 +49,12 @@ const filteredWeighted = computed(() => dashboardOffers.value.reduce((sum, offer
       </article>
     </section>
     <section class="panel detail-wide">
-      <div class="panel-header"><div><p class="eyebrow">SON TOPLANTILAR</p><h3>Kaydedilen analizler</h3></div><RouterLink class="text-link" to="/meetings">Geçmiş</RouterLink></div>
+      <div class="panel-header"><div><p class="eyebrow">SON TOPLANTIN</p><h3>En son kaydettiğin analiz</h3></div><RouterLink class="text-link" to="/meetings">Geçmiş</RouterLink></div>
       <div v-if="recentMeetings.length" class="history-preview-grid">
         <article v-for="meeting in recentMeetings" :key="meeting.id" class="history-preview">
           <strong>{{ salesStore.customerName(meeting.customerId) }}</strong>
           <span>{{ new Date(meeting.createdAt).toLocaleString("tr-TR") }}</span>
-          <small>{{ meeting.insights.length }} içgörü · {{ meeting.wordCount }} kelime</small>
+          <small>{{ meeting.insights?.length || 0 }} içgörü · {{ meeting.wordCount || 0 }} kelime</small>
         </article>
       </div>
       <div v-else class="empty-state">Henüz kaydedilmiş toplantı yok. İlk analizi başlatarak geçmişi oluşturabilirsin.</div>

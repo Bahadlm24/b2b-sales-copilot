@@ -8,6 +8,7 @@ const editingId = ref(null);
 const draft = reactive({ status: "", scheduledAt: "", result: "", notes: "", ownerId: null });
 const feedback = ref("");
 const statuses = ["Görüşme planlandı", "Görüşme sağlandı", "Tekrar görüşme planlandı", "Karar aşaması", "Olumlu", "Olumsuz"];
+const progressFor = (status) => ({ "Görüşme planlandı": 20, "Görüşme sağlandı": 45, "Tekrar görüşme planlandı": 60, "Karar aşaması": 82, "Olumlu": 100, "Olumsuz": 100 }[status] || 0);
 const entities = computed(() => form.entityType === "lead"
   ? salesStore.state.leads.filter((item) => !item.archived && !item.convertedCustomerId).map((item) => ({ id: item.id, name: item.company || item.name }))
   : salesStore.customers.filter((item) => !item.archived).map((item) => ({ id: item.id, name: item.name })));
@@ -93,7 +94,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString("tr-TR", { 
             <td><button class="primary-button compact" @click="save(item)">Kaydet</button><button class="text-link" @click="editingId = null">Vazgeç</button></td>
           </template>
           <template v-else>
-            <td><span class="journey-status" :class="item.status === 'Olumlu' ? 'success' : item.status === 'Olumsuz' ? 'danger' : ''">{{ item.status }}</span></td>
+            <td><span class="journey-status" :class="item.status === 'Olumlu' ? 'success' : item.status === 'Olumsuz' ? 'danger' : ''">{{ item.status }}</span><i class="journey-progress" :class="{ success: item.status === 'Olumlu', danger: item.status === 'Olumsuz' }"><b :style="{ width: `${progressFor(item.status)}%` }"></b></i></td>
             <td>{{ formatDate(item.scheduledAt) }}</td><td>{{ salesStore.userName(item.ownerId) }}</td><td><span>{{ item.result || item.notes || "—" }}</span><small>{{ item.history?.length || 1 }} hareket</small></td><td><button class="secondary-button" @click="edit(item)">Güncelle</button></td>
           </template>
         </tr><tr v-if="!rows.length"><td colspan="8" class="empty-state">Filtreye uygun takip kaydı bulunamadı.</td></tr></tbody>

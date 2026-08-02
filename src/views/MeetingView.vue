@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { initialTranscript } from "../data/mockData";
 import { analyzeConversation, analyzeTranscript, buildNextMeetingPlan } from "../services/meetingAnalyzer";
@@ -14,6 +14,8 @@ const insights = ref(analyzeTranscript(initialTranscript));
 const nextMeetingPlan = ref(buildNextMeetingPlan(initialTranscript, insights.value));
 const conversationAnalysis = ref(analyzeConversation(initialTranscript));
 const savedMessage = ref("");
+const liveSyncState = ref("bekleniyor");
+let liveSyncTimer;
 const activeCustomers = computed(() => salesStore.customers.filter((item) => !item.archived));
 const selectedCustomerId = ref(Number(route.query.customer) || activeCustomers.value[0]?.id);
 const selectedOwnerId = ref(salesStore.currentUser.value.id);
@@ -24,6 +26,17 @@ const wordCount = computed(() => transcript.value.trim() ? transcript.value.trim
 watch(selectedCustomerId, (id) => {
   router.replace({ query: { ...route.query, customer: id } });
 });
+function syncLiveTranscript() {
+  const session = salesStore.state.liveMeetingSessions.find((item) => item.customerId === selectedCustomerId.value && item.status !== "completed");
+  if (!session?.segments?.length) return;
+  const nextTranscript = session.segments.map((item) => `${item.speaker || "Konuşmacı"}: ${item.text}`).join("\n");
+  if (nextTranscript !== transcript.value) {
+    transcript.value = nextTranscript;
+    liveSyncState.value = `${session.platform || "Toplantı"} · ${session.segments.length} konuşma parçası senkronize edildi`;
+  }
+}
+onMounted(() => { syncLiveTranscript(); liveSyncTimer = window.setInterval(syncLiveTranscript, 1000); });
+onUnmounted(() => window.clearInterval(liveSyncTimer));
 function analyzeMeeting() {
   if (!transcript.value.trim()) return;
   isAnalyzing.value = true;
@@ -71,9 +84,9 @@ function analyzeMeeting() {
   <section v-if="!customer" class="panel not-found"><span>404</span><h2>Müşteri bulunamadı veya arşivlenmiş.</h2><RouterLink class="primary-button compact link-button" to="/customers">Müşterilere dön</RouterLink></section>
   <div v-if="customer" class="workspace-grid">
     <section class="panel meeting-panel">
-      <div class="panel-header"><div><p class="eyebrow">TOPLANTI GİRDİSİ</p><h3>Konuşma metni</h3></div><span class="counter">{{ wordCount }} kelime</span></div>
+      <div class="panel-header"><div><p class="eyebrow">TOPLANTI GİRDİSİ</p><h3>Konuşma metni</h3></div><span class="live-transcript-state"><i></i>{{ liveSyncState }}</span><span class="counter">{{ wordCount }} kelime</span></div>
       <textarea v-model="transcript" placeholder="Toplantı konuşmasını buraya yapıştırın..."></textarea>
-      <div class="helper"><span>ⓘ</span><p>İlk sürüm metin üzerinden çalışır. Canlı ses bağlantısını sonraki aşamada ekleyeceğiz.</p></div>
+      <div class="helper"><span>ⓘ</span><p>Meet, Teams veya Zoom eklentisinden gelen konuşma parçaları seçili müşteriyle eşleştiğinde bu alan otomatik güncellenir; gerektiğinde metni elle de düzenleyebilirsin.</p></div>
       <button class="primary-button" :disabled="isAnalyzing || !transcript.trim()" @click="analyzeMeeting"><span v-if="isAnalyzing" class="spinner"></span>{{ isAnalyzing ? "Analiz ediliyor..." : "Satış analizini oluştur" }}</button>
       <p v-if="savedMessage" class="success-message" role="status">{{ savedMessage }}</p>
     </section>

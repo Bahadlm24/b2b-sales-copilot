@@ -2,7 +2,7 @@
 
 `/leads` sayfası reklam ve web formu kaynaklı potansiyel müşterileri tek havuzda toplamak için hazırlanmıştır.
 
-## Desteklenen Mock Kaynaklar
+## Desteklenen Kaynaklar
 
 - Meta Lead Ads
   - Facebook
@@ -11,7 +11,46 @@
 - Web sitesi veya landing page formu
 - Manuel giriş
 
-Bağlantılar bu sürümde ağ isteği yapmaz. Kaynak ve kampanya alanları gerçek entegrasyondan gelecek veriyi temsil eden mock kayıtlardır.
+`/integrations` sayfası her tenant ve kaynak için webhook URL’si üretir. Yerel sürüm ağ isteği dinlemez; sayfadaki test aracı aynı doğrulama, alan normalizasyonu ve mükerrer kontrolünü tarayıcı içinde çalıştırır.
+
+## Gelen Data Adresleri
+
+Canlı temel adres `https://api.firmaniz.com/api` ise örnek uçlar şöyledir:
+
+```text
+POST https://api.firmaniz.com/api/v1/inbound/{tenantId}/meta
+POST https://api.firmaniz.com/api/v1/inbound/{tenantId}/google-ads
+POST https://api.firmaniz.com/api/v1/inbound/{tenantId}/webform
+```
+
+Bu adresler kullanıcıların ziyaret edeceği Vue sayfaları değildir. İnternetten erişilebilen backend webhook uçlarıdır. Başarılı istek `202 Accepted`, mükerrer telefon `409 Conflict`, geçersiz imza `401 Unauthorized`, hatalı alan `422 Unprocessable Entity` döndürmelidir.
+
+Ortak örnek payload:
+
+```json
+{
+  "name": "Ayşe Yılmaz",
+  "company": "Örnek A.Ş.",
+  "phone": "05305056648",
+  "email": "ayse@example.com",
+  "campaign": "Q3 Demo Formu",
+  "lead_id": "external-123"
+}
+```
+
+Telefon zorunludur. `name`, `full_name`, `first_name`/`last_name`; `phone`, `phone_number`; `email`, `email_address` alan adları ortak modele çevrilir.
+
+### Meta / Instagram
+
+Meta webhook doğrulama isteğine backend cevap vermeli, teslimatlarda `X-Hub-Signature-256` imzasını uygulama secret ile doğrulamalıdır. Meta çoğunlukla form alanları yerine lead kimliği gönderir; backend bu kimliği Graph API üzerinden okuyup ortak payload’a dönüştürür. App secret tarayıcıya yazılmaz.
+
+### Google Ads
+
+Google Ads Lead Form Asset ayarına Google webhook URL’si ve anahtarı girilir. Backend teslimat anahtarını doğrular, `gclid` ve lead kimliğini saklar.
+
+### Web Form
+
+Web sitesi formu JSON payload’ı `X-Form-Key` başlığıyla gönderir. Public formlarda gizli anahtar HTML içine gömülmemeli; form backend üzerinden proxy edilmeli veya kısa ömürlü form tokenı, CAPTCHA ve rate limit kullanılmalıdır.
 
 ## Lead Alanları
 

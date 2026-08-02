@@ -79,7 +79,7 @@ function personLogs(name) {
     </section>
     <section class="panel detail-wide">
       <p class="eyebrow">SATIŞÇI GELİŞİMİ</p><h3>Görüşme kalitesi</h3>
-      <div class="metric-grid"><div><strong>84</strong><span>İhtiyaç keşfi</span></div><div><strong>76</strong><span>İtiraz yönetimi</span></div><div><strong>68</strong><span>Kapanış soruları</span></div><div><strong>91</strong><span>Ürün bilgisi</span></div></div>
+      <div class="metric-grid circular-metrics"><div v-for="metric in [{ value: 84, label: 'İhtiyaç keşfi' }, { value: 76, label: 'İtiraz yönetimi' }, { value: 68, label: 'Kapanış soruları' }, { value: 91, label: 'Ürün bilgisi' }]" :key="metric.label"><i :style="{ '--metric': metric.value }"><strong>%{{ metric.value }}</strong></i><span>{{ metric.label }}</span></div></div>
     </section>
   </div>
 </template>

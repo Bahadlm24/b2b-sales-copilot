@@ -1,8 +1,10 @@
-import { createApp } from "vue";
+import { createApp, watchEffect } from "vue";
 import App from "./App.vue";
 import router from "./router";
 import "./style.css";
 import { salesStore } from "./stores/salesStore";
+
+watchEffect(() => { document.title = salesStore.state.organization.productName || "Sales Copilot"; });
 import { themeStore } from "./stores/themeStore";
 
 themeStore.initialize();

@@ -123,7 +123,7 @@ const state = reactive({
   activities: Array.isArray(saved.activities) ? saved.activities : defaultActivities,
   offers: (Array.isArray(saved.offers) ? saved.offers : defaultOffers).map((item) => ({ ownerId: 2, outcomeReason: "", revisions: [], archived: false, cancelled: false, ...item })),
   meetingJourneys: Array.isArray(saved.meetingJourneys) ? saved.meetingJourneys : defaultMeetingJourneys,
-  organization: { id: "local-demo", name: "Demo Firma", plan: "local", ...(saved.organization || {}) },
+  organization: { id: "local-demo", name: "Demo Firma", productName: "Sales Copilot", brandMark: "S", plan: "local", ...(saved.organization || {}) },
   productUpdates: Array.isArray(saved.productUpdates) ? saved.productUpdates : defaultProductUpdates,
   readProductUpdates: Array.isArray(saved.readProductUpdates) ? saved.readProductUpdates : [],
   inboundSettings: {
@@ -133,6 +133,7 @@ const state = reactive({
     ...(saved.inboundSettings || {}),
     sources: { ...Object.fromEntries(Object.keys(inboundSources).map((key) => [key, { enabled: true, token: `mock_${key}_change_me`, received: 0, lastReceivedAt: null }])), ...(saved.inboundSettings?.sources || {}) },
   },
+  liveMeetingSessions: Array.isArray(saved.liveMeetingSessions) ? saved.liveMeetingSessions : [],
   clientContext: {
     ipAddress: "127.0.0.1",
     userAgent: "local-mock",
@@ -161,6 +162,7 @@ function persist() {
     productUpdates: state.productUpdates,
     readProductUpdates: state.readProductUpdates,
     inboundSettings: state.inboundSettings,
+    liveMeetingSessions: state.liveMeetingSessions,
   }));
 }
 
@@ -314,6 +316,17 @@ export const salesStore = {
     if (!state.readProductUpdates.includes(version)) state.readProductUpdates.push(version);
     persist();
   },
+  updateOrganizationBranding(changes) {
+    const name = changes.name?.trim();
+    const productName = changes.productName?.trim();
+    const brandMark = changes.brandMark?.trim().slice(0, 3).toLocaleUpperCase("tr-TR");
+    if (!name || !productName || !brandMark) return { ok: false, message: "Firma adı, ürün adı ve logo harfi zorunludur." };
+    const before = { name: state.organization.name, productName: state.organization.productName, brandMark: state.organization.brandMark };
+    Object.assign(state.organization, { name, productName, brandMark });
+    audit("organization.branding_updated", "organization", state.organization.id, changeDetails(before, { name, productName, brandMark }));
+    persist();
+    return { ok: true, message: "Firma ve ürün görünümü güncellendi." };
+  },
   setInboundBaseUrl(url) {
     if (!/^https?:\/\//i.test(url)) return false;
     state.inboundSettings.baseUrl = url.replace(/\/$/, "");
@@ -364,6 +377,16 @@ export const salesStore = {
     audit("integration.webhook_received", "integration", sourceKey, { status: log.status, message: log.message, externalLeadId: log.externalLeadId }, log.status === "accepted" ? "success" : "failed");
     persist();
     return { ok: log.status === "accepted", message: log.message, log };
+  },
+  upsertLiveMeetingSession(session) {
+    if (!session?.customerId || !Array.isArray(session.segments)) return false;
+    const existing = state.liveMeetingSessions.find((item) => item.sessionId === session.sessionId);
+    const record = { ...session, customerId: Number(session.customerId), updatedAt: session.updatedAt || new Date().toISOString() };
+    if (existing) Object.assign(existing, record);
+    else state.liveMeetingSessions.unshift(record);
+    if (state.liveMeetingSessions.length > 20) state.liveMeetingSessions.length = 20;
+    persist();
+    return true;
   },
   activitiesFor(entityType, entityId) {
     return state.activities
@@ -581,7 +604,7 @@ export const salesStore = {
       state.mailOutbox.unshift({
         id: nextLocalId(),
         to: user.email,
-        subject: "Sales Copilot giriş bilgisi",
+        subject: `${state.organization.productName} giriş bilgisi`,
         message: `Merhaba ${user.name}, kullanıcı adınız: ${user.username}. Geçici mock şifreniz: ${user.password}`,
         createdAt: new Date().toISOString(),
       });
@@ -589,7 +612,7 @@ export const salesStore = {
         "mail.queued",
         "mail",
         state.mailOutbox[0].id,
-        { to: user.email, subject: "Sales Copilot giriş bilgisi" },
+        { to: user.email, subject: `${state.organization.productName} giriş bilgisi` },
         "success",
         null,
         { statusCode: 202, message: "E-posta kuyruğa alındı" },

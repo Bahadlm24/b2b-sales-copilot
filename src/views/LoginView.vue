@@ -30,10 +30,11 @@ function changeMode(nextMode) {
 <template>
   <main class="login-page">
     <section class="login-brand">
-      <span class="brand-mark large-mark">S</span>
+      <span class="brand-mark large-mark">{{ salesStore.state.organization.brandMark }}</span>
+      <strong class="login-product-name">{{ salesStore.state.organization.productName }}</strong>
       <p class="eyebrow light">B2B SATIŞ ÇALIŞMA ALANI</p>
       <h1>Satış ekibinin karar merkezi.</h1>
-      <p>Müşterileri, teklifleri, takipleri ve toplantı içgörülerini tek yerde yönet.</p>
+      <p>{{ salesStore.state.organization.name }} için müşterileri, teklifleri, takipleri ve toplantı içgörülerini tek yerde yönet.</p>
     </section>
     <section class="login-card">
       <div v-if="mode === 'login'">

@@ -20,11 +20,6 @@ const importFeedback = ref("");
 const isReadingFile = ref(false);
 const expandedLeadId = ref(null);
 const form = reactive({ name: "", company: "", phone: "", email: "", source: "Web Form", campaign: "", score: 50 });
-const connections = [
-  { name: "Meta Lead Ads", channels: "Facebook · Instagram", status: "Mock bağlı", color: "blue" },
-  { name: "Google Ads", channels: "Lead form uzantısı", status: "Mock bağlı", color: "amber" },
-  { name: "Web Form API", channels: "Site ve landing page", status: "Hazır", color: "green" },
-];
 
 const filteredLeads = computed(() => salesStore.state.leads.filter((lead) => {
   if (Boolean(lead.archived) !== showArchived.value) return false;
@@ -90,12 +85,6 @@ function importValidRows() {
     <article class="summary-card"><small>TOPLAM LEAD</small><strong>{{ salesStore.state.leads.length }}</strong><span>Tüm reklam kaynakları</span></article>
     <article class="summary-card"><small>YENİ / NİTELİKLİ</small><strong>{{ newLeadCount }} / {{ qualifiedCount }}</strong><span>Takip bekleyen potansiyel</span></article>
     <article class="summary-card"><small>ORTALAMA SKOR</small><strong>{{ averageScore }}</strong><span>100 üzerinden</span></article>
-  </section>
-
-  <section class="connection-grid">
-    <article v-for="connection in connections" :key="connection.name" class="connection-card" :class="connection.color">
-      <span class="connection-icon">↗</span><div><strong>{{ connection.name }}</strong><small>{{ connection.channels }}</small></div><span class="connection-status">{{ connection.status }}</span>
-    </article>
   </section>
 
   <section class="panel excel-import-panel">

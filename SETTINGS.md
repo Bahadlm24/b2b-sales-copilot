@@ -2,6 +2,10 @@
 
 `/settings` sayfası Sistem Yöneticisinin kod değişikliği yapmadan kullanıcı erişimlerini ve organizasyon yapısını yönetmesini sağlar.
 
+## Firma ve Ürün Kimliği
+
+Firma adı, uygulamada gösterilecek ürün adı ve 1–3 karakterli logo işareti Ayarlar ekranından değiştirilebilir. Ürün adı sidebar, giriş ekranı, tarayıcı sekmesi ve sistem e-postalarında ortak kaynaktan okunur. Firma adı tenant/organizasyon etiketi olarak gösterilir. Değişiklikler local mock sürümde `localStorage` içinde saklanır; canlı sürümde tenant branding tablosundan gelmelidir.
+
 ## Kişi Bazlı Yetkiler
 
 Yönetici kullanıcıyı seçer ve aşağıdaki sayfa izinlerini ayrı ayrı açıp kapatır:

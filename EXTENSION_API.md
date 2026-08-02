@@ -33,6 +33,29 @@ POST /api/meetings/analyze
 Content-Type: application/json
 ```
 
+## Canlı Transcript Senkronizasyonu
+
+Eklenti aktif toplantı sırasında konuşma parçalarını müşteri kimliğiyle birlikte backend oturumuna gönderir. Web uygulamasındaki Toplantı Girdisi bu oturumu WebSocket/SSE ile izlemeli; yerel mock store aynı sözleşmeyi `upsertLiveMeetingSession` ile simüle eder.
+
+```http
+PUT /api/meeting-sessions/{sessionId}/transcript
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "sessionId": "meet-abc-123",
+  "customerId": 42,
+  "platform": "google-meet",
+  "status": "active",
+  "segments": [
+    { "speaker": "Satış", "role": "sales", "text": "Karar tarihiniz nedir?", "capturedAt": "2026-08-02T10:30:00.000Z" },
+    { "speaker": "Müşteri", "role": "participant", "text": "Ay sonuna kadar karar vermek istiyoruz.", "capturedAt": "2026-08-02T10:30:03.000Z" }
+  ]
+}
+```
+
 ```json
 {
   "customerId": 1,

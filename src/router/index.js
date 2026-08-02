@@ -44,9 +44,9 @@ const router = createRouter({
         { path: "offers/:id", name: "offer-detail", component: OfferDetailView, meta: { permission: "offers" } },
         { path: "analytics", name: "analytics", component: AnalyticsView, meta: { permission: "analytics" } },
         { path: "reports", name: "sales-reports", component: SalesReportsView, meta: { permission: "analytics" } },
-        { path: "users", name: "users", component: UsersView, meta: { permission: "users" } },
-        { path: "settings", name: "settings", component: SettingsView, meta: { permission: "settings" } },
-        { path: "integrations", name: "integrations", component: IntegrationsView, meta: { permission: "settings" } },
+        { path: "users", name: "users", component: UsersView, meta: { permission: "users", systemAdmin: true } },
+        { path: "settings", name: "settings", component: SettingsView, meta: { permission: "settings", systemAdmin: true } },
+        { path: "integrations", name: "integrations", component: IntegrationsView, meta: { permission: "settings", systemAdmin: true } },
         { path: "audit", name: "audit", component: AuditView, meta: { permission: "audit" } },
         { path: "access-denied", name: "access-denied", component: AccessDeniedView },
       ],
@@ -63,6 +63,7 @@ router.beforeEach((to) => {
   if (to.name === "login" && salesStore.isAuthenticated.value) return { name: "dashboard" };
   const permission = to.meta.permission;
   if (permission && !salesStore.can(permission)) return { name: "access-denied" };
+  if (to.meta.systemAdmin && salesStore.currentUser.value.role !== "admin") return { name: "access-denied" };
   return true;
 });
 
