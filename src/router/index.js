@@ -16,6 +16,7 @@ import AccessDeniedView from "../views/AccessDeniedView.vue";
 import LoginView from "../views/LoginView.vue";
 import LeadsView from "../views/LeadsView.vue";
 import SettingsView from "../views/SettingsView.vue";
+import IntegrationsView from "../views/IntegrationsView.vue";
 import AuditView from "../views/AuditView.vue";
 import LeadDetailView from "../views/LeadDetailView.vue";
 import OfferDetailView from "../views/OfferDetailView.vue";
@@ -45,6 +46,7 @@ const router = createRouter({
         { path: "reports", name: "sales-reports", component: SalesReportsView, meta: { permission: "analytics" } },
         { path: "users", name: "users", component: UsersView, meta: { permission: "users" } },
         { path: "settings", name: "settings", component: SettingsView, meta: { permission: "settings" } },
+        { path: "integrations", name: "integrations", component: IntegrationsView, meta: { permission: "settings" } },
         { path: "audit", name: "audit", component: AuditView, meta: { permission: "audit" } },
         { path: "access-denied", name: "access-denied", component: AccessDeniedView },
       ],

@@ -22,6 +22,7 @@ const titles = {
   "sales-reports": ["YÖNETİM RAPORLARI", "Satış Sonuçları"],
   users: ["SİSTEM YÖNETİMİ", "Kullanıcılar ve Roller"],
   settings: ["SİSTEM AYARLARI", "Yetki ve Organizasyon"],
+  integrations: ["SERVİS BAĞLANTILARI", "Gelen Data Entegrasyonları"],
   audit: ["SİSTEM KAYITLARI", "Audit ve Mail Geçmişi"],
   "access-denied": ["ERİŞİM KONTROLÜ", "Yetkisiz Erişim"],
 };
@@ -100,6 +101,7 @@ function logout() {
         <RouterLink v-if="salesStore.can('analytics')" class="nav-item" to="/reports"><span>▥</span> Satış Raporları</RouterLink>
         <RouterLink v-if="salesStore.can('users')" class="nav-item" to="/users"><span>⚙</span> Kullanıcılar</RouterLink>
         <RouterLink v-if="salesStore.can('settings')" class="nav-item" to="/settings"><span>⋯</span> Ayarlar</RouterLink>
+        <RouterLink v-if="salesStore.can('settings')" class="nav-item" to="/integrations"><span>⇄</span> Entegrasyonlar</RouterLink>
         <RouterLink v-if="salesStore.can('audit')" class="nav-item" to="/audit"><span>◷</span> Audit Log</RouterLink>
       </nav>
       <div class="sidebar-bottom">
