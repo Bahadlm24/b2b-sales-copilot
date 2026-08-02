@@ -2,6 +2,31 @@ import { analyzeTranscript, buildLiveAlert } from "./meeting-intelligence.js";
 import { findKnowledge, loadKnowledgeBase } from "./knowledge-base.js";
 
 const knowledgePromise = loadKnowledgeBase().catch(() => []);
+const UPDATE_ALARM = "sales-copilot-update-check";
+const UPDATE_URL = "https://sales-copilot-demo.vlexy.chatgpt.site/api/extension/version";
+
+const compareVersions = (left, right) => {
+  const a = String(left).split(".").map(Number);
+  const b = String(right).split(".").map(Number);
+  for (let index = 0; index < Math.max(a.length, b.length); index += 1) {
+    if ((a[index] || 0) !== (b[index] || 0)) return (a[index] || 0) > (b[index] || 0) ? 1 : -1;
+  }
+  return 0;
+};
+
+async function checkExtensionUpdate() {
+  try {
+    const response = await fetch(UPDATE_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Sürüm servisi ${response.status} döndürdü`);
+    const release = await response.json();
+    const currentVersion = chrome.runtime.getManifest().version;
+    const update = { ...release, currentVersion, available: compareVersions(currentVersion, release.latestVersion) < 0, unsupported: compareVersions(currentVersion, release.minimumSupportedVersion) < 0, checkedAt: new Date().toISOString() };
+    await chrome.storage.local.set({ extensionUpdate: update });
+    chrome.runtime.sendMessage({ type: "EXTENSION_UPDATE_STATUS", update }).catch(() => {});
+  } catch (error) {
+    await chrome.storage.local.set({ extensionUpdateError: { message: error.message, checkedAt: new Date().toISOString() } });
+  }
+}
 
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
@@ -20,6 +45,13 @@ chrome.runtime.onInstalled.addListener(async () => {
       ]
     });
   }
+  await chrome.alarms.create(UPDATE_ALARM, { delayInMinutes: 1, periodInMinutes: 60 });
+  await checkExtensionUpdate();
+});
+
+chrome.runtime.onStartup.addListener(() => checkExtensionUpdate());
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === UPDATE_ALARM) checkExtensionUpdate();
 });
 
 async function processCaption(tabId, caption) {

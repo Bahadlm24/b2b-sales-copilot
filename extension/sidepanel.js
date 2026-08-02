@@ -59,6 +59,21 @@ function renderCustomer() {
 }
 function setStatus(text, error = false) { $("status").textContent = text; $("status").classList.toggle("error", error); }
 
+function renderUpdate(update) {
+  const hidden = !update?.available || update.dismissedVersion === update.latestVersion;
+  $("updateBanner").classList.toggle("hidden", hidden);
+  if (hidden) return;
+  $("updateTitle").textContent = `${update.latestVersion} sürümü hazır`;
+  $("updateText").textContent = update.unsupported
+    ? `Kullandığınız ${update.currentVersion} sürümü eski. Verileriniz korunur; en iyi deneyim için uzantıyı güncelleyin.`
+    : `${update.title || "Yeni özellikler ve iyileştirmeler yayınlandı."} Chrome güncellemeyi otomatik uygular.`;
+}
+
+async function loadUpdateStatus() {
+  const { extensionUpdate } = await chrome.storage.local.get("extensionUpdate");
+  renderUpdate(extensionUpdate);
+}
+
 function renderLive(showPopup = false) {
   $("captionCount").textContent = segments.length;
   $("captions").classList.toggle("empty", !segments.length);
@@ -198,6 +213,7 @@ async function stopMeeting() {
 }
 
 chrome.runtime.onMessage.addListener((message) => {
+  if (message.type === "EXTENSION_UPDATE_STATUS") renderUpdate(message.update);
   if (message.type === "MEETING_CAPTION" && message.tabId === activeTabId) {
     const previous = segments.at(-1);
     const extendsPrevious = previous
@@ -232,6 +248,14 @@ chrome.runtime.onMessage.addListener((message) => {
       : "Yakalama aktif fakat altyazı bulunamadı. Toplantı uygulamasında canlı altyazıları açın.",
       message.visibleCaptionNodes === 0);
   }
+});
+
+$("dismissUpdate").addEventListener("click", async () => {
+  const { extensionUpdate } = await chrome.storage.local.get("extensionUpdate");
+  if (!extensionUpdate) return;
+  const dismissed = { ...extensionUpdate, dismissedVersion: extensionUpdate.latestVersion };
+  await chrome.storage.local.set({ extensionUpdate: dismissed });
+  renderUpdate(dismissed);
 });
 
 $("settingsToggle").addEventListener("click", () => $("settingsPanel").classList.toggle("hidden"));
@@ -290,6 +314,7 @@ async function restoreSession() {
 }
 
 await loadSettings();
+await loadUpdateStatus();
 knowledgeArticles = await loadKnowledgeBase().catch(() => []);
 await loadCustomers();
 const meetTab = await findMeetTab();

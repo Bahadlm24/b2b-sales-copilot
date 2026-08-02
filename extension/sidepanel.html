@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="tr">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><title>Sales Copilot</title><link rel="stylesheet" href="sidepanel.css" /></head>
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><title>Sales Copilot</title><link rel="stylesheet" href="sidepanel.css" /><style>.update-banner{display:grid;gap:10px;margin-bottom:12px;padding:13px;border:1px solid #b8d66c;border-radius:14px;background:#eff8d8;color:#163c30}.update-banner p{margin:5px 0 0;font-size:11px;line-height:1.45}.update-banner button{justify-self:start}@media(prefers-color-scheme:dark){.update-banner{border-color:#637a39;background:#26351f;color:#edf7da}}</style></head>
   <body>
     <header><div><small>SALES COPILOT</small><h1>Toplantı Asistanı</h1></div><button id="settingsToggle" class="icon">⚙</button></header>
+    <section id="updateBanner" class="update-banner hidden"><div><strong id="updateTitle">Yeni sürüm hazır</strong><p id="updateText"></p></div><button id="dismissUpdate" class="secondary">Daha sonra</button></section>
     <section id="settingsPanel" class="card hidden">
       <h2>Bağlantı ayarları</h2>
       <label>Çalışma modu<select id="mode"><option value="mock">Mock / yerel</option><option value="api">API</option></select></label>
