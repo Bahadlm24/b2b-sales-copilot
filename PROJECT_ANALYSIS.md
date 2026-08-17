@@ -2,7 +2,7 @@
 
 ## Mevcut Durum
 
-Proje Vue 3, Vue Router ve Vite ile oluşturulmuş istemci taraflı bir satış yönetimi MVP'sidir. Harici UI veya state yönetimi bağımlılığı kullanılmamaktadır.
+Proje Vue 3, Vue Router ve Vite ile oluşturulmuş istemci taraflı bir satış yönetimi MVP'sidir. Durum `salesStore` dilimlerinde tutulur; kalıcılık `persistence.js`, canlı adresler `runtime-config.js` üzerinden okunur. Harici UI kütüphanesi kullanılmamaktadır.
 
 ## Tamamlanan Modüller
 
@@ -14,7 +14,7 @@ Proje Vue 3, Vue Router ve Vite ile oluşturulmuş istemci taraflı bir satış 
 | Toplantı asistanı | MVP | Metin analizi, müşteri bağlamı ve içgörü üretimi |
 | Toplantı geçmişi | Tamamlandı | Analizlerin yerel olarak saklanması |
 | Takipler | Tamamlandı | Ekleme, filtreleme, aşama, gecikme göstergesi, tamamlama ve silme |
-| Analizler | Mock veri | İtiraz dağılımı ve satışçı metrikleri |
+| Analizler | Tamamlandı | Store verisinden itiraz dağılımı ve satışçı metrikleri |
 | Hata yönetimi | Temel | Bilinmeyen rotalar için 404 görünümü |
 
 ## Güçlü Yönler
@@ -36,4 +36,4 @@ Proje Vue 3, Vue Router ve Vite ile oluşturulmuş istemci taraflı bir satış 
 
 ## Önerilen Sonraki Karar
 
-Yeni ekran eklemeden önce API sözleşmesi ve kimlik doğrulama yaklaşımı belirlenmelidir. İlk backend dilimi; kullanıcı, müşteri, teklif, görev ve toplantı analizi kaynaklarını kapsamalıdır.
+Yeni ekran eklemeden önce [DEPLOY.md](DEPLOY.md) ile statik canlı test açılmalı, ardından API sözleşmesi ve kimlik doğrulama belirlenmelidir. İlk backend dilimi; kullanıcı, müşteri, teklif, görev ve toplantı analizi kaynaklarını kapsamalıdır.

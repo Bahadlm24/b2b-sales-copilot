@@ -1,5 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
+import OwnerSelect from "../components/OwnerSelect.vue";
+import SummaryGrid from "../components/SummaryGrid.vue";
 import { salesStore } from "../stores/salesStore";
 const status = ref("Tümü");
 const showArchived = ref(false);
@@ -18,17 +20,17 @@ function submitOffer() {
 </script>
 
 <template>
-  <section class="summary-grid">
-    <article class="summary-card"><small>AÇIK TEKLİF</small><strong>{{ salesStore.activeOffers.value.length }}</strong><span>Aktif satış süreci</span></article>
-    <article class="summary-card"><small>TOPLAM TUTAR</small><strong>₺{{ total }}</strong><span>Açık teklif değeri</span></article>
-    <article class="summary-card"><small>ORTALAMA OLASILIK</small><strong>%{{ averageProbability }}</strong><span>Açık teklifler</span></article>
-  </section>
+  <SummaryGrid :items="[
+    { label: 'AÇIK TEKLİF', value: salesStore.activeOffers.value.length, hint: 'Aktif satış süreci' },
+    { label: 'TOPLAM TUTAR', value: `₺${total}`, hint: 'Açık teklif değeri' },
+    { label: 'ORTALAMA OLASILIK', value: `%${averageProbability}`, hint: 'Açık teklifler' },
+  ]" />
   <section class="panel offer-create-panel">
     <div class="panel-header"><div><p class="eyebrow">YENİ SATIŞ FIRSATI</p><h3>Teklif oluştur</h3></div></div>
     <form class="task-form" @submit.prevent="submitOffer">
       <div class="form-row"><label><span>Müşteri *</span><select v-model.number="form.customerId" class="select-input" required><option v-for="customer in salesStore.customers.filter(x => !x.archived)" :key="customer.id" :value="customer.id">{{ customer.name }}</option></select></label><label><span>Teklif başlığı *</span><input v-model="form.title" class="search-input" required /></label></div>
       <div class="form-row"><label><span>Tutar (₺) *</span><input v-model.number="form.numericAmount" class="search-input" type="number" min="1" required /></label><label><span>Geçerlilik tarihi *</span><input v-model="form.validUntil" class="search-input" type="date" required /></label></div>
-      <div class="form-row"><label><span>Sorumlu personel</span><select v-model.number="form.ownerId" class="select-input"><option v-for="user in salesStore.state.users.filter(x => x.active)" :key="user.id" :value="user.id">{{ user.name }}</option></select></label><label><span>Başarı olasılığı: %{{ form.probability }}</span><input v-model.number="form.probability" class="range-input" type="range" min="0" max="100" /></label></div>
+      <div class="form-row"><label><span>Sorumlu personel</span><OwnerSelect v-model="form.ownerId" /></label><label><span>Başarı olasılığı: %{{ form.probability }}</span><input v-model.number="form.probability" class="range-input" type="range" min="0" max="100" /></label></div>
       <button class="primary-button" type="submit">Teklif oluştur</button>
       <p v-if="feedback" class="form-feedback" role="status">{{ feedback }}</p>
     </form>

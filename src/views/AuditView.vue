@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
+import SummaryGrid from "../components/SummaryGrid.vue";
 import { salesStore } from "../stores/salesStore";
 
 const tab = ref("audit");
@@ -37,11 +38,11 @@ function downloadJson(fileName, data) {
 </script>
 
 <template>
-  <section class="summary-grid">
-    <article class="summary-card"><small>TOPLAM AUDIT KAYDI</small><strong>{{ salesStore.state.auditLogs.length }}</strong><span>Son 2.000 işlem saklanır</span></article>
-    <article class="summary-card"><small>BAŞARISIZ İŞLEM</small><strong>{{ salesStore.state.auditLogs.filter((log) => log.status === 'failed').length }}</strong><span>Giriş ve işlem hataları</span></article>
-    <article class="summary-card"><small>MAIL LOG</small><strong>{{ salesStore.state.mailOutbox.length }}</strong><span>Kuyruğa alınan mesajlar</span></article>
-  </section>
+  <SummaryGrid :items="[
+    { label: 'TOPLAM AUDIT KAYDI', value: salesStore.state.auditLogs.length, hint: 'Son 2.000 işlem saklanır' },
+    { label: 'BAŞARISIZ İŞLEM', value: salesStore.state.auditLogs.filter((log) => log.status === 'failed').length, hint: 'Giriş ve işlem hataları' },
+    { label: 'MAIL LOG', value: salesStore.state.mailOutbox.length, hint: 'Kuyruğa alınan mesajlar' },
+  ]" />
 
   <section class="panel table-panel">
     <div class="audit-tabs">

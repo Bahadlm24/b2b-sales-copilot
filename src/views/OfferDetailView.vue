@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import ActivityTimeline from "../components/ActivityTimeline.vue";
+import OwnerSelect from "../components/OwnerSelect.vue";
 import { salesStore } from "../stores/salesStore";
 
 const route = useRoute();
@@ -53,7 +54,7 @@ function cancelCurrentOffer() {
           <label><span>Teklif başlığı</span><input v-model="form.title" class="search-input" required /></label>
           <div class="form-row"><label><span>Tutar (₺)</span><input v-model.number="form.numericAmount" class="search-input" type="number" min="0" required /></label><label><span>Geçerlilik</span><input v-model="form.validUntil" class="search-input" required /></label></div>
           <div class="form-row"><label><span>Durum</span><select v-model="form.status" class="select-input"><option v-for="status in statuses" :key="status">{{ status }}</option></select></label><label><span>Olasılık: %{{ form.probability }}</span><input v-model="form.probability" class="range-input" type="range" min="0" max="100" /></label></div>
-          <label><span>Sorumlu personel</span><select v-model.number="form.ownerId" class="select-input"><option v-for="user in salesStore.state.users.filter(x => x.active)" :key="user.id" :value="user.id">{{ user.name }}</option></select></label>
+          <label><span>Sorumlu personel</span><OwnerSelect v-model="form.ownerId" /></label>
           <label v-if="['Kazanıldı', 'Kaybedildi'].includes(form.status)"><span>Sonuç nedeni *</span><textarea v-model="form.outcomeReason" class="compact-textarea" required placeholder="Teklif neden kazanıldı veya kaybedildi?" /></label>
           <button class="primary-button" type="submit">Teklifi güncelle</button>
           <p v-if="feedback" class="form-feedback" role="status">{{ feedback }}</p>

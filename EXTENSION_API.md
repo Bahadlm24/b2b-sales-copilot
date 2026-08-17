@@ -158,3 +158,5 @@ Backend kayıtta şunları sunucu tarafından üretmelidir:
 ```
 
 Önerilen durum kodları: `400`, `401`, `403`, `404`, `409`, `422`, `429`, `500`.
+
+Canlı testte SPA origin ile API origin farklıysa API sunucusu CORS ile SPA adresine izin vermelidir. İstemci kökü `runtime-config.js` → `apiBaseUrl` ve eklenti yan paneli aynı değeri kullanır. [DEPLOY.md](DEPLOY.md).

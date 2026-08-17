@@ -7,18 +7,24 @@ Toplantı satış yolculuğu ve çoklu firma dağıtım modeli için [MEETING_TR
 ```text
 Vue görünümleri
     ↓
-salesStore / meetingAnalyzer
+salesStore (domain dilimleri) / meetingAnalyzer
     ↓
-mockData + localStorage
+appConfig + persistence (localStorage veya ileride API)
+    ↓
+seed / mockData
 ```
+
+### Yapılandırma
+
+`src/config/appConfig.js` build anındaki `.env` değerlerini ve sunucudaki `runtime-config.js` dosyasını birleştirir. Kalıcılık `src/stores/persistence.js` üzerinden gider; backend eklendiğinde görünümler değil bu katman değişir. Sunucuya dosya atma adımları [DEPLOY.md](DEPLOY.md) belgesindedir.
+
+### Durum Katmanı
+
+`src/stores/salesStore.js` dilimleri birleştiren yüzdür. Auth, lead, müşteri, teklif, görev, toplantı, dizin ve entegrasyon mantığı `src/stores/slices/` altındadır. Durum Vue `reactive` ve `computed` API'leriyle tutulur.
 
 ### Görünüm Katmanı
 
 `src/views` rota bazlı ekranları içerir. `AppLayout.vue` ortak navigasyon ve sayfa başlığını sağlar.
-
-### Durum Katmanı
-
-`src/stores/salesStore.js` görevleri, toplantı geçmişini ve pipeline hesaplarını tek noktadan yönetir. Durum Vue `reactive` ve `computed` API'leriyle tutulur.
 
 ### İş Mantığı
 
@@ -41,12 +47,13 @@ Audit kayıtları aktör, zaman, IP, user-agent, response ve işlem detayların�
 
 ### Tema ve Tasarım Sistemi
 
-`src/stores/themeStore.js` açık/koyu tema tercihini yönetir ve `localStorage` içinde saklar. `src/style.css` içindeki ortak renk, yüzey, sınır ve gölge tokenları tüm görünümlerde kullanılır. Sayfalar varsayılan olarak bu ortak katmanı devralır; ileride özel tasarım isteyen bir görünüm kendi sınıfıyla sınırlı override ekleyebilir.
+`src/stores/themeStore.js` açık/koyu tema tercihini yönetir ve `localStorage` içinde saklar. Tasarım tokenları `src/styles/tokens.css`, kabuk `src/styles/shell.css`, bileşen stilleri `src/styles/components.css` dosyalarındadır; `src/style.css` bunları içe aktarır.
 
 ### Veri Katmanı
 
-- Referans müşteri ve teklifler: `src/data/mockData.js`
-- Kullanıcı işlemleri: tarayıcı `localStorage`
+- Referans müşteri ve teklifler: `src/data/mockData.js` ve `src/data/seed.js`
+- Kullanıcı işlemleri: tarayıcı `localStorage` (`src/stores/persistence.js`)
+- Canlı adresler: `public/runtime-config.js` (sunucuda düzenlenir)
 - Kalıcı anahtar: `sales-copilot-state-v1`
 
 ### Chrome Eklentisi
@@ -69,8 +76,11 @@ Audit kayıtları aktör, zaman, IP, user-agent, response ve işlem detayların�
 | `/offers` | Teklifler |
 | `/offers/:id` | Teklif detayı ve güncelleme |
 | `/analytics` | Analizler |
+| `/reports` | Satış sonuç raporu |
 | `/users` | Kullanıcı ve rol yönetimi |
 | `/settings` | Dinamik izin, departman, takım ve token ayarları |
+| `/integrations` | Gelen data / webhook ayarları |
+| `/meeting-tracker` | Toplantı takip tablosu |
 | `/audit` | Audit history ve mail log |
 | `/access-denied` | Yetkisiz erişim |
 
@@ -86,7 +96,7 @@ GET/POST /meetings
 POST /meetings/analyze
 ```
 
-API yanıtları için yükleniyor, boş, hata ve yetkisiz durumları ortak bir sözleşmeyle ele alınmalıdır.
+API yanıtları için yükleniyor, boş, hata ve yetkisiz durumları ortak bir sözleşmeyle ele alınmalıdır. İstemci kök adresi `runtime-config.js` içindeki `apiBaseUrl` alanından okunur.
 
 ## Test Stratejisi
 

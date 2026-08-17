@@ -86,6 +86,8 @@ girilir. Chrome yalnızca seçilen API origin'i için kullanıcıdan çalışma 
 
 Token eklentinin yerel deposunda tutulur. Canlı sürümde kısa ömürlü access token ve refresh/token exchange akışı kullanılmalıdır; kalıcı yönetici tokenı girilmemelidir.
 
+Sunucu yayını sonrası SPA adresi `https://crm.example.com` ise eklenti API kökü `https://crm.example.com/api` olur. Bu değer `runtime-config.js` ile aynı tutulmalıdır. Chrome, API origin için çalışma zamanı izni ister. Adım adım: [DEPLOY.md](DEPLOY.md).
+
 ## Google Meet Uyumluluğu
 
 Google Meet DOM yapısı Google tarafından değiştirilebilir. `content-script.js` birden fazla bilinen altyazı seçicisini destekler. Meet arayüzü değiştiğinde yalnızca altyazı adaptörü güncellenmelidir.

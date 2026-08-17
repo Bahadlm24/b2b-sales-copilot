@@ -43,7 +43,7 @@ Her müşteri kendi kullanıcılarını, müşterilerini, toplantılarını ve e
 Mock sürümde yayın notları `productUpdates` koleksiyonunda tutulur ve okunmamış sürümler bildirim merkezine düşer. Canlı dağıtımda:
 
 1. Web uygulaması sürümlü statik paket olarak yayınlanır.
-2. `version.json` veya release API son sürümü döndürür.
+2. `public/version.json` build ile `dist/version.json` olur; canlıda bu dosya veya release API son sürümü döndürür.
 3. Yeni sürüm algılandığında kullanıcının işlemi kesilmeden “Güncelleme geldi” bildirimi gösterilir.
 4. Sayfa güvenli yenilemede yeni paketi otomatik alır.
 5. Chrome eklentisi Chrome Web Store üzerinden yayınlanır ve Chrome tarafından otomatik güncellenir.

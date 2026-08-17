@@ -56,6 +56,10 @@ Lead
 
 ## Canlıya Geçiş Öncesi
 
+İlk adım: statik `dist/` yayını ve [DEPLOY.md](DEPLOY.md) kontrol listesi. Bu, arayüzün HTTPS üzerinde açılmasını sağlar; veriler hâlâ tarayıcıdadır.
+
+Ortak canlı kullanım için:
+
 - PostgreSQL veri modeli ve migrationlar
 - Backend API ve sunucu taraflı yetki kontrolü
 - Güvenli parola hashleme, access/refresh token ve token iptali

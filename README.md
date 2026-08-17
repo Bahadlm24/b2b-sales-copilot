@@ -73,12 +73,23 @@ npm run preview   # Üretim paketini yerelde sunar
 
 ## Veri Saklama
 
-Müşteri ve teklifler şu anda `src/data/mockData.js` içindeki örnek verilerden gelir. Kullanıcının oluşturduğu görevler ve toplantı analizleri `sales-copilot-state-v1` anahtarıyla `localStorage` içinde saklanır.
+Müşteri ve teklifler şu anda `src/data/mockData.js` ve `src/data/seed.js` içindeki örnek verilerden gelir. Kullanıcı işlemleri `sales-copilot-state-v1` anahtarıyla `localStorage` içinde saklanır.
 
-Bu yapı MVP kullanımı içindir. Çok kullanıcılı üretim ortamında API, kimlik doğrulama ve sunucu tarafı veritabanı eklenmelidir.
+Bu yapı MVP ve canlı **statik** test içindir. Çok kullanıcılı üretim ortamında API, kimlik doğrulama ve sunucu tarafı veritabanı eklenmelidir.
+
+## Canlı test / sunucuya atma
+
+Paket üretimi, `runtime-config.js` ayarları, Nginx/Apache ve gerekli bağlantılar: [DEPLOY.md](DEPLOY.md).
+
+```bash
+npm run build          # dist/ üretir
+# dist/ içeriğini sunucu web köküne kopyalayın
+# sunucuda dist/runtime-config.js dosyasını düzenleyin
+```
 
 ## Dokümantasyon
 
+- [Sunucu yayını ve canlı test](DEPLOY.md)
 - [Proje analizi](PROJECT_ANALYSIS.md)
 - [Mimari](ARCHITECTURE.md)
 - [Yol haritası](ROADMAP.md)

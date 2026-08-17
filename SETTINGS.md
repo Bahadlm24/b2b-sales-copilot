@@ -52,3 +52,5 @@ Rol değiştirildiğinde kullanıcı izinleri seçilen rolün başlangıç izinl
 - Token değerinin tamamı arayüzde gösterilmez.
 
 Bu yapı yerel mock test içindir. Canlı sistemde token üretimi ve doğrulaması backend kimlik servisi tarafından yapılmalı; refresh token HTTP-only güvenli çerezde tutulmalıdır.
+
+Entegrasyonlar ekranındaki varsayılan API kökü `public/runtime-config.js` / `.env` içindeki `apiBaseUrl` değerinden gelir. Sunucuya attıktan sonra adresi `dist/runtime-config.js` dosyasından değiştirin; tarayıcıda eski `localStorage` varsa Entegrasyonlar formundan da güncelleyin. Ayrıntı: [DEPLOY.md](DEPLOY.md).

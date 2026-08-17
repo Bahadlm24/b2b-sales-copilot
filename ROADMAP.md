@@ -2,11 +2,12 @@
 
 ## P0 — Üretim Temeli
 
-- API sözleşmesini ve veri modelini kesinleştir
-- Kimlik doğrulama ve rol tabanlı yetkilendirme ekle
-- Müşteri, teklif, görev ve toplantı için kalıcı veritabanı kur
-- Ortam değişkenleri ve güvenli yapılandırma yönetimi ekle
-- API hata durumlarını ve kullanıcı bildirimlerini standartlaştır
+- [x] İstemci ortam değişkenleri ve sunucuda düzenlenen `runtime-config.js`
+- [x] Statik yayın (`dist/`) ve SPA sunucu örneği ([DEPLOY.md](DEPLOY.md))
+- [ ] API sözleşmesini ve veri modelini kesinleştir
+- [ ] Kimlik doğrulama ve rol tabanlı yetkilendirme ekle (sunucu tarafı)
+- [ ] Müşteri, teklif, görev ve toplantı için kalıcı veritabanı kur
+- [ ] API hata durumlarını ve kullanıcı bildirimlerini standartlaştır
 
 ## P1 — Satış İş Akışları
 

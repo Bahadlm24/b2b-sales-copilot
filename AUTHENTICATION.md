@@ -32,7 +32,9 @@ Sistem Yöneticisi `/users` sayfasından şu alanlarla kullanıcı oluşturabili
 
 ## Güvenlik Sınırı
 
-Şifreler yalnızca mock geliştirme amacıyla yerel tarayıcı verisinde açık metin tutulur. Bu yaklaşım canlı ortam için güvenli değildir. Üretime geçerken:
+Şifreler yalnızca mock geliştirme ve canlı **statik** test amacıyla yerel tarayıcı verisinde açık metin tutulur. İnternete açık bir adreste gerçek müşteri verisi kullanılmamalı; erişim VPN veya HTTP basic auth ile sınırlanmalıdır. Ayrıntı: [DEPLOY.md](DEPLOY.md).
+
+Üretime geçerken:
 
 - Kimlik doğrulama backend tarafına taşınmalı,
 - Şifreler güçlü bir parola hash algoritmasıyla saklanmalı,

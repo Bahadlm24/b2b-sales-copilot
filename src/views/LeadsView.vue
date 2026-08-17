@@ -1,11 +1,12 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import readXlsxFile from "read-excel-file/browser";
+import ActivityTimeline from "../components/ActivityTimeline.vue";
+import SummaryGrid from "../components/SummaryGrid.vue";
 import { formatPhoneNumber } from "../services/phoneFormatter";
 import { prepareLeadImport } from "../services/leadImporter";
 import { salesStore } from "../stores/salesStore";
-import readXlsxFile from "read-excel-file/browser";
-import ActivityTimeline from "../components/ActivityTimeline.vue";
 
 const sources = ["Facebook", "Instagram", "Google Ads", "Web Form", "Manuel"];
 const router = useRouter();
@@ -81,11 +82,11 @@ function importValidRows() {
 </script>
 
 <template>
-  <section class="summary-grid">
-    <article class="summary-card"><small>TOPLAM LEAD</small><strong>{{ salesStore.state.leads.length }}</strong><span>Tüm reklam kaynakları</span></article>
-    <article class="summary-card"><small>YENİ / NİTELİKLİ</small><strong>{{ newLeadCount }} / {{ qualifiedCount }}</strong><span>Takip bekleyen potansiyel</span></article>
-    <article class="summary-card"><small>ORTALAMA SKOR</small><strong>{{ averageScore }}</strong><span>100 üzerinden</span></article>
-  </section>
+  <SummaryGrid :items="[
+    { label: 'TOPLAM LEAD', value: salesStore.state.leads.length, hint: 'Tüm reklam kaynakları' },
+    { label: 'YENİ / NİTELİKLİ', value: `${newLeadCount} / ${qualifiedCount}`, hint: 'Takip bekleyen potansiyel' },
+    { label: 'ORTALAMA SKOR', value: averageScore, hint: '100 üzerinden' },
+  ]" />
 
   <section class="panel excel-import-panel">
     <div class="panel-header">

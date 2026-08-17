@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
+import SummaryGrid from "../components/SummaryGrid.vue";
 import { salesStore } from "../stores/salesStore";
 
 const currency = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
@@ -25,11 +26,11 @@ const filteredWeighted = computed(() => dashboardOffers.value.reduce((sum, offer
     <div class="dashboard-actions"><select v-if="canViewTeam" v-model="ownerFilter" class="select-input"><option value="mine">Yalnızca bana ait</option><option value="all">Tüm ekip</option></select><span v-else class="personal-scope">Yalnızca sana ait kayıtlar</span><RouterLink class="dashboard-analysis-button" to="/meeting">Yeni analiz başlat <b>→</b></RouterLink></div>
   </section>
 
-  <section class="summary-grid dashboard-summary">
-    <article class="summary-card"><small>TOPLAM PIPELINE</small><strong>{{ currency.format(filteredPipeline) }}</strong><span>{{ dashboardOffers.length }} açık teklif</span></article>
-    <article class="summary-card"><small>AĞIRLIKLI TAHMİN</small><strong>{{ currency.format(filteredWeighted) }}</strong><span>Olasılığa göre</span></article>
-    <article class="summary-card"><small>LEAD / AÇIK TAKİP</small><strong>{{ filteredLeads.length }} / {{ priorityTasks.length }}</strong><span>Seçili görünüm</span></article>
-  </section>
+  <SummaryGrid extra-class="dashboard-summary" :items="[
+    { label: 'TOPLAM PIPELINE', value: currency.format(filteredPipeline), hint: `${dashboardOffers.length} açık teklif` },
+    { label: 'AĞIRLIKLI TAHMİN', value: currency.format(filteredWeighted), hint: 'Olasılığa göre' },
+    { label: 'LEAD / AÇIK TAKİP', value: `${filteredLeads.length} / ${priorityTasks.length}`, hint: 'Seçili görünüm' },
+  ]" />
 
   <div class="dashboard-grid">
     <section class="panel">

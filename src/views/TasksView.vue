@@ -1,5 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
+import OwnerSelect from "../components/OwnerSelect.vue";
 import { salesStore } from "../stores/salesStore";
 
 const filter = ref("Tümü");
@@ -46,7 +47,7 @@ function submitTask() {
           <label><span>Son tarih</span><input v-model="form.dueDate" class="search-input" type="date" required /></label>
           <label><span>Öncelik</span><select v-model="form.priority" class="select-input"><option>Yüksek</option><option>Orta</option><option>Düşük</option></select></label>
         </div>
-        <label><span>Sorumlu</span><select v-model.number="form.ownerId" class="select-input"><option v-for="user in salesStore.state.users.filter(x => x.active)" :key="user.id" :value="user.id">{{ user.name }}</option></select></label>
+        <label><span>Sorumlu</span><OwnerSelect v-model="form.ownerId" /></label>
         <button class="primary-button" type="submit">Takip görevi ekle</button>
       </form>
     </section>
@@ -63,7 +64,7 @@ function submitTask() {
         </article>
         <form v-if="editingId" class="task-edit-card" @submit.prevent="saveEdit">
           <div class="form-row"><label><span>Başlık</span><input v-model="editForm.title" class="search-input" required /></label><label><span>Son tarih</span><input v-model="editForm.dueDate" class="search-input" type="date" required /></label></div>
-          <div class="form-row"><label><span>Öncelik</span><select v-model="editForm.priority" class="select-input"><option>Yüksek</option><option>Orta</option><option>Düşük</option></select></label><label><span>Sorumlu</span><select v-model.number="editForm.ownerId" class="select-input"><option v-for="user in salesStore.state.users.filter(x => x.active)" :key="user.id" :value="user.id">{{ user.name }}</option></select></label></div>
+          <div class="form-row"><label><span>Öncelik</span><select v-model="editForm.priority" class="select-input"><option>Yüksek</option><option>Orta</option><option>Düşük</option></select></label><label><span>Sorumlu</span><OwnerSelect v-model="editForm.ownerId" /></label></div>
           <div class="record-actions"><button class="primary-button compact">Kaydet</button><button type="button" class="secondary-button" @click="editingId = null">Vazgeç</button></div>
         </form>
         <p v-if="!visibleTasks.length" class="empty-state">Bu filtrede görev bulunmuyor.</p>

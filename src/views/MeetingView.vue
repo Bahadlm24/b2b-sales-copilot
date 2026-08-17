@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import OwnerSelect from "../components/OwnerSelect.vue";
 import { initialTranscript } from "../data/mockData";
 import { analyzeConversation, analyzeTranscript, buildNextMeetingPlan } from "../services/meetingAnalyzer";
 import { salesStore } from "../stores/salesStore";
@@ -79,7 +80,7 @@ function analyzeMeeting() {
   </section>
   <section v-if="customer" class="meeting-meta-panel">
     <label><span>Toplantı tarihi</span><input v-model="meetingDate" class="search-input" type="datetime-local" /></label>
-    <label><span>Sorumlu personel</span><select v-model.number="selectedOwnerId" class="select-input"><option v-for="user in salesStore.state.users.filter(x => x.active)" :key="user.id" :value="user.id">{{ user.name }}</option></select></label>
+    <label><span>Sorumlu personel</span><OwnerSelect v-model="selectedOwnerId" /></label>
   </section>
   <section v-if="!customer" class="panel not-found"><span>404</span><h2>Müşteri bulunamadı veya arşivlenmiş.</h2><RouterLink class="primary-button compact link-button" to="/customers">Müşterilere dön</RouterLink></section>
   <div v-if="customer" class="workspace-grid">

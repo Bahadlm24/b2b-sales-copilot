@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
+import SummaryGrid from "../components/SummaryGrid.vue";
 import { salesStore } from "../stores/salesStore";
 
 const personnelPerformance = computed(() => salesStore.state.users.filter((user) => user.active).map((user) => {
@@ -38,11 +39,11 @@ function personLogs(name) {
 </script>
 
 <template>
-  <section class="summary-grid">
-    <article class="summary-card"><small>ANALİZ EDİLEN GÖRÜŞME</small><strong>{{ salesStore.state.meetings.length }}</strong><span>Yerel toplantı kayıtları</span></article>
-    <article class="summary-card"><small>ORTALAMA FIRSAT SKORU</small><strong>{{ averageScore }}</strong><span>Aktif müşteriler</span></article>
-    <article class="summary-card"><small>KAPANAN SATIŞ</small><strong>{{ wonOffers.length }}</strong><span>{{ currency.format(salesStore.wonRevenue.value) }}</span></article>
-  </section>
+  <SummaryGrid :items="[
+    { label: 'ANALİZ EDİLEN GÖRÜŞME', value: salesStore.state.meetings.length, hint: 'Yerel toplantı kayıtları' },
+    { label: 'ORTALAMA FIRSAT SKORU', value: averageScore, hint: 'Aktif müşteriler' },
+    { label: 'KAPANAN SATIŞ', value: wonOffers.length, hint: currency.format(salesStore.wonRevenue.value) },
+  ]" />
   <div class="analytics-grid">
     <section class="panel detail-wide">
       <div class="panel-header"><div><p class="eyebrow">PERSONEL PERFORMANSI</p><h3>Satış ve müşteri dönüşleri</h3></div><span class="analytics-total">{{ currency.format(totalSales) }} toplam · %{{ averageResponseRate }} ort. dönüş</span></div>

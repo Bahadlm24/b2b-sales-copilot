@@ -1,5 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
+import OwnerSelect from "../components/OwnerSelect.vue";
 import { salesStore } from "../stores/salesStore";
 
 const filters = reactive({ search: "", status: "Tümü", owner: "all", entityType: "all" });
@@ -72,7 +73,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString("tr-TR", { 
       <label><span>Kayıt tipi</span><select v-model="form.entityType" class="select-input" @change="resetEntity"><option value="lead">Potansiyel müşteri</option><option value="customer">Müşteri</option></select></label>
       <label><span>Firma / kişi *</span><select v-model.number="form.entityId" class="select-input" required><option value="">Seçin</option><option v-for="item in entities" :key="item.id" :value="item.id">{{ item.name }}</option></select></label>
       <label><span>Toplantı tarihi *</span><input v-model="form.scheduledAt" class="search-input" type="datetime-local" required /></label>
-      <label><span>Sorumlu</span><select v-model.number="form.ownerId" class="select-input"><option v-for="user in salesStore.state.users.filter(x => x.active)" :key="user.id" :value="user.id">{{ user.name }}</option></select></label>
+      <label><span>Sorumlu</span><OwnerSelect v-model="form.ownerId" /></label>
       <label class="tracker-notes"><span>Gündem / not</span><input v-model="form.notes" class="search-input" placeholder="Görüşmenin amacı" /></label>
       <button class="primary-button compact">Planla</button>
     </form>

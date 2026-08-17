@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import ActivityTimeline from "../components/ActivityTimeline.vue";
+import OwnerSelect from "../components/OwnerSelect.vue";
 import { salesStore } from "../stores/salesStore";
 const route = useRoute();
 const customer = computed(() => salesStore.customers.find(x => x.id === Number(route.params.id)) || null);
@@ -56,7 +57,7 @@ function saveCustomer() {
       <div class="form-row"><label><span>Yetkili</span><input v-model="form.contact" class="search-input" /></label><label><span>Görevi</span><input v-model="form.role" class="search-input" /></label></div>
       <div class="form-row"><label><span>E-posta</span><input v-model="form.email" class="search-input" type="email" /></label><label><span>Sektör</span><input v-model="form.sector" class="search-input" /></label></div>
       <div class="form-row"><label><span>Şehir</span><input v-model="form.city" class="search-input" /></label><label><span>Aşama</span><select v-model="form.stage" class="select-input"><option v-for="stage in stages" :key="stage">{{ stage }}</option></select></label></div>
-      <div class="form-row"><label><span>Sorumlu personel</span><select v-model.number="form.ownerId" class="select-input"><option v-for="user in salesStore.state.users.filter(x => x.active)" :key="user.id" :value="user.id">{{ user.name }}</option></select></label><label><span>Potansiyel tutar</span><input v-model="form.revenue" class="search-input" /></label></div>
+      <div class="form-row"><label><span>Sorumlu personel</span><OwnerSelect v-model="form.ownerId" /></label><label><span>Potansiyel tutar</span><input v-model="form.revenue" class="search-input" /></label></div>
       <label><span>Fırsat skoru: {{ form.score }}</span><input v-model.number="form.score" class="range-input" type="range" min="0" max="100" /></label>
       <button class="primary-button" type="submit">Değişiklikleri kaydet</button>
     </form>

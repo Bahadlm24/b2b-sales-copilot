@@ -1,6 +1,8 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import OwnerSelect from "../components/OwnerSelect.vue";
+import SummaryGrid from "../components/SummaryGrid.vue";
 import { formatPhoneNumber } from "../services/phoneFormatter";
 import { salesStore } from "../stores/salesStore";
 const router = useRouter();
@@ -34,11 +36,11 @@ function contactFreshness(item) {
 </script>
 
 <template>
-  <section class="summary-grid">
-    <article class="summary-card"><small>TOPLAM MÜŞTERİ</small><strong>{{ activeCustomers.length }}</strong><span>{{ salesStore.customers.filter(x => x.archived).length }} arşiv kaydı</span></article>
-    <article class="summary-card"><small>AKTİF FIRSAT</small><strong>{{ salesStore.activeOffers.value.length }}</strong><span>{{ new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', notation: 'compact' }).format(salesStore.pipelineValue.value) }}</span></article>
-    <article class="summary-card"><small>KARAR AŞAMASI</small><strong>{{ decisionCount }}</strong><span>Aktif müşteriler</span></article>
-  </section>
+  <SummaryGrid :items="[
+    { label: 'TOPLAM MÜŞTERİ', value: activeCustomers.length, hint: `${salesStore.customers.filter(x => x.archived).length} arşiv kaydı` },
+    { label: 'AKTİF FIRSAT', value: salesStore.activeOffers.value.length, hint: new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', notation: 'compact' }).format(salesStore.pipelineValue.value) },
+    { label: 'KARAR AŞAMASI', value: decisionCount, hint: 'Aktif müşteriler' },
+  ]" />
   <section class="panel customer-create-panel">
     <div class="panel-header"><div><p class="eyebrow">MANUEL KAYIT</p><h3>Yeni müşteri ekle</h3></div><span class="required-note">* Zorunlu alan</span></div>
     <form class="task-form" @submit.prevent="submitCustomer">
@@ -46,7 +48,7 @@ function contactFreshness(item) {
       <div class="form-row"><label><span>Yetkili adı</span><input v-model="form.contact" class="search-input" /></label><label><span>Görevi</span><input v-model="form.role" class="search-input" /></label></div>
       <div class="form-row"><label><span>E-posta</span><input v-model="form.email" class="search-input" type="email" /></label><label><span>Sektör</span><input v-model="form.sector" class="search-input" /></label></div>
       <div class="form-row"><label><span>Şehir</span><input v-model="form.city" class="search-input" /></label><label><span>Aşama</span><select v-model="form.stage" class="select-input"><option v-for="stage in stages" :key="stage">{{ stage }}</option></select></label></div>
-      <div class="form-row"><label><span>Sorumlu personel</span><select v-model.number="form.ownerId" class="select-input"><option v-for="user in salesStore.state.users.filter(x => x.active)" :key="user.id" :value="user.id">{{ user.name }}</option></select></label><label><span>Potansiyel tutar</span><input v-model="form.revenue" class="search-input" placeholder="₺250.000" /></label></div>
+      <div class="form-row"><label><span>Sorumlu personel</span><OwnerSelect v-model="form.ownerId" /></label><label><span>Potansiyel tutar</span><input v-model="form.revenue" class="search-input" placeholder="₺250.000" /></label></div>
       <label><span>Fırsat skoru: {{ form.score }}</span><input v-model.number="form.score" class="range-input" type="range" min="0" max="100" /></label>
       <button class="primary-button" type="submit">Müşteri oluştur</button>
       <p v-if="feedback" class="form-feedback" role="status">{{ feedback }}</p>

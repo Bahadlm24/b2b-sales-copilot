@@ -11,7 +11,7 @@
 - Web sitesi veya landing page formu
 - Manuel giriş
 
-`/integrations` sayfası her tenant ve kaynak için webhook URL’si üretir. Yerel sürüm ağ isteği dinlemez; sayfadaki test aracı aynı doğrulama, alan normalizasyonu ve mükerrer kontrolünü tarayıcı içinde çalıştırır.
+`/integrations` sayfası her tenant ve kaynak için webhook URL’si üretir. Yerel sürüm ağ isteği dinlemez; sayfadaki test aracı aynı doğrulama, alan normalizasyonu ve mükerrer kontrolünü tarayıcı içinde çalıştırır. Canlı kök adres `runtime-config.js` içindeki `apiBaseUrl` (veya Entegrasyonlar formundaki temel adres) ile üretilir.
 
 ## Gelen Data Adresleri
 

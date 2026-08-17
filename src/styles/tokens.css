@@ -1,0 +1,82 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  font-family: "DM Sans", Arial, sans-serif;
+  color: #17211d;
+  background: #f3f5f4;
+  font-synthesis: none;
+  --green: #163c30;
+  --lime: #c7f067;
+  --page-bg: #f3f5f4;
+  --surface: #ffffff;
+  --surface-soft: #f7f9f8;
+  --text: #17211d;
+  --muted: #6c7570;
+  --border: #dfe5e1;
+  --shadow: 0 12px 32px rgba(23, 60, 48, .07);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color: #e8efeb;
+  background: #0d1512;
+  --green: #102b23;
+  --page-bg: #0d1512;
+  --surface: #15201c;
+  --surface-soft: #1a2823;
+  --text: #e8efeb;
+  --muted: #9baaa3;
+  --border: #2a3a33;
+  --shadow: 0 14px 36px rgba(0, 0, 0, .24);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--page-bg);
+  color: var(--text);
+}
+
+button,
+textarea,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  transition: border-color .18s ease, background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.page-view {
+  width: 100%;
+}
