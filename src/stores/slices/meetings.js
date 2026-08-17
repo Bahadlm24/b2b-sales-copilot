@@ -1,9 +1,10 @@
 import { analyzeConversation, analyzeTranscript } from "../../services/meetingAnalyzer.js";
+import { locale, t } from "../../i18n/localeStore.js";
 
 export function createMeetingsSlice({ state, persist, nextLocalId, changeDetails, audit, recordActivity }) {
   return {
     createMeetingJourney(data) {
-      if (!data.entityId || !data.scheduledAt) return { ok: false, message: "Kayıt ve toplantı tarihi zorunludur." };
+      if (!data.entityId || !data.scheduledAt) return { ok: false, message: t("store.journeyRequired") };
       const record = {
         id: nextLocalId(), entityType: data.entityType === "lead" ? "lead" : "customer",
         entityId: Number(data.entityId), ownerId: Number(data.ownerId) || state.currentUserId,
@@ -19,11 +20,11 @@ export function createMeetingsSlice({ state, persist, nextLocalId, changeDetails
     },
     updateMeetingJourney(id, changes) {
       const journey = state.meetingJourneys.find((item) => item.id === Number(id));
-      if (!journey) return { ok: false, message: "Takip kaydı bulunamadı." };
+      if (!journey) return { ok: false, message: t("store.journeyMissing") };
       const before = { status: journey.status, scheduledAt: journey.scheduledAt, result: journey.result, notes: journey.notes, ownerId: journey.ownerId, round: journey.round };
       const nextStatus = changes.status || journey.status;
-      if (["Olumlu", "Olumsuz"].includes(nextStatus) && !changes.result?.trim() && !journey.result?.trim()) return { ok: false, message: "Nihai karar için sonuç açıklaması zorunludur." };
-      if (nextStatus === "Tekrar görüşme planlandı" && !changes.scheduledAt) return { ok: false, message: "Yeni toplantı tarihi zorunludur." };
+      if (["Olumlu", "Olumsuz"].includes(nextStatus) && !changes.result?.trim() && !journey.result?.trim()) return { ok: false, message: t("store.journeyResultRequired") };
+      if (nextStatus === "Tekrar görüşme planlandı" && !changes.scheduledAt) return { ok: false, message: t("store.journeyDateRequired") };
       if (nextStatus === "Tekrar görüşme planlandı" && journey.status !== "Tekrar görüşme planlandı") journey.round += 1;
       Object.assign(journey, {
         status: nextStatus,
@@ -81,8 +82,8 @@ export function createMeetingsSlice({ state, persist, nextLocalId, changeDetails
       const before = { transcript: meeting.transcript, wordCount: meeting.wordCount };
       meeting.transcript = transcript.trim();
       meeting.wordCount = meeting.transcript.split(/\s+/).length;
-      meeting.insights = analyzeTranscript(meeting.transcript);
-      meeting.conversationAnalysis = analyzeConversation(meeting.transcript);
+      meeting.insights = analyzeTranscript(meeting.transcript, locale.value);
+      meeting.conversationAnalysis = analyzeConversation(meeting.transcript, locale.value);
       meeting.updatedAt = new Date().toISOString();
       recordActivity("customer", meeting.customerId, "meeting", "Toplantı notu güncellendi", `${meeting.wordCount} kelime`);
       audit("meeting.updated", "meeting", id, changeDetails(before, { transcript: meeting.transcript, wordCount: meeting.wordCount, overallScore: meeting.conversationAnalysis.overallScore }));

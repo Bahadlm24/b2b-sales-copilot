@@ -1,3 +1,5 @@
+import { t } from "../i18n/localeStore.js";
+
 export const roles = {
   admin: {
     label: "Sistem Yöneticisi",
@@ -38,5 +40,7 @@ export function hasPermission(role, permission) {
 }
 
 export function roleLabel(role) {
-  return roles[role]?.label ?? "Tanımsız rol";
+  const translated = t(`roles.${role}`);
+  if (translated !== `roles.${role}`) return translated;
+  return roles[role]?.label ?? t("roles.unknown");
 }

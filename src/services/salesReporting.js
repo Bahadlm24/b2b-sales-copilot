@@ -50,7 +50,13 @@ export function buildSalesReport(state, filters = {}) {
   }).sort((a, b) => b.conversions - a.conversions || b.leads - a.leads);
   return {
     totals: { leads: leads.length, active: active.length, passive: passive.length, uninterested: uninterested.length, responded: responded.length, converted: converted.length, customers: customers.filter((item) => !item.archived).length, meetings: meetings.length, heldMeetings: heldJourneys.length, positive: positiveJourneys.length, negative: negativeJourneys.length, wonDeals: wonOffers.length, lostDeals: lostOffers.length, revenue, pipeline, averageMeetingScore, responseRate: Math.round(responded.length / (leads.length || 1) * 100), conversionRate: Math.round(converted.length / (leads.length || 1) * 100), winRate: Math.round(wonOffers.length / ((wonOffers.length + lostOffers.length) || 1) * 100) },
-    funnel: [{ label: "Toplam data", value: leads.length }, { label: "Dönüş yapan", value: responded.length }, { label: "Görüşme sağlandı", value: heldJourneys.length }, { label: "Müşteri olan", value: converted.length }, { label: "Kazanılan satış", value: wonOffers.length }],
+    funnel: [
+      { key: "totalData", label: "Toplam data", value: leads.length },
+      { key: "responded", label: "Dönüş yapan", value: responded.length },
+      { key: "held", label: "Görüşme sağlandı", value: heldJourneys.length },
+      { key: "converted", label: "Müşteri olan", value: converted.length },
+      { key: "won", label: "Kazanılan satış", value: wonOffers.length },
+    ],
     personnel, sourcePerformance,
   };
 }

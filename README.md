@@ -33,6 +33,7 @@ Satış ekiplerinin müşteri, teklif, takip ve toplantı içgörülerini tek ç
 - Türkiye telefon numarası normalizasyonu
 - Yerel tarayıcı depolamasıyla oturumlar arası veri koruma
 - Ortak tasarım tokenlarıyla kalıcı modern açık/koyu tema
+- Türkçe ve İngilizce arayüz (üst çubuktan TR/EN)
 - Son temas tarihi ve takip önceliği görünür müşteri listesi
 - Mobil uyumlu arayüz ve 404 sayfası
 
@@ -71,6 +72,8 @@ npm run build     # Üretim paketini oluşturur
 npm run preview   # Üretim paketini yerelde sunar
 ```
 
+Giriş ekranı ve üst çubuktaki **TR / EN** düğmesi arayüz dilini değiştirir. Seçim tarayıcıda saklanır. Sunucuda varsayılan dil için `runtime-config.js` içine `locale: "en"` veya `locale: "tr"` yazılabilir. Kayıtlı durum değerleri (`Yeni`, `Kazanıldı` vb.) değişmez; yalnızca ekranda çevrilir.
+
 ## Veri Saklama
 
 Müşteri ve teklifler şu anda `src/data/mockData.js` ve `src/data/seed.js` içindeki örnek verilerden gelir. Kullanıcı işlemleri `sales-copilot-state-v1` anahtarıyla `localStorage` içinde saklanır.
@@ -93,6 +96,7 @@ npm run build          # dist/ üretir
 - [Proje analizi](PROJECT_ANALYSIS.md)
 - [Mimari](ARCHITECTURE.md)
 - [Yol haritası](ROADMAP.md)
+- [Tanıtım PDF](docs/Sales-Copilot-Tanitim.pdf)
 - [Sayfa erişimleri ve roller](ACCESS_CONTROL.md)
 - [Yerel kimlik doğrulama](AUTHENTICATION.md)
 - [Lead toplama ve takip](LEADS.md)

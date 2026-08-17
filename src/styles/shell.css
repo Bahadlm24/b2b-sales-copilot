@@ -146,6 +146,7 @@
 }
 
 .login-card {
+  position: relative;
   width: min(430px, calc(100% - 48px));
   margin: auto;
   padding: 38px;
@@ -153,6 +154,12 @@
   border-radius: 20px;
   background: white;
   box-shadow: 0 24px 70px rgba(23, 60, 48, .1);
+}
+
+.login-locale {
+  position: absolute;
+  top: 18px;
+  right: 18px;
 }
 
 .login-card h2 {

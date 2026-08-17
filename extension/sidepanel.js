@@ -1,6 +1,7 @@
 import { analyzeWithApi, getCustomers, saveMeeting } from "./api-client.js";
 import { analyzeTranscript, buildLiveAlert, summarizeMeeting } from "./meeting-intelligence.js";
 import { findKnowledge, loadKnowledgeBase } from "./knowledge-base.js";
+import { applySidepanelCopy, uiText } from "./ui-i18n.js";
 
 const $ = (id) => document.getElementById(id);
 let customers = [];
@@ -33,6 +34,11 @@ async function loadSettings() {
   $("mode").value = settings.mode || "mock";
   languagePreference = settings.language || "auto";
   $("language").value = languagePreference;
+  applySidepanelCopy(languagePreference);
+  if ($("suggestions").classList.contains("empty")) $("suggestions").textContent = uiText("suggestionsEmpty", languagePreference);
+  if ($("captions").classList.contains("empty")) $("captions").textContent = uiText("captionsEmpty", languagePreference);
+  if ($("qaHistory").classList.contains("empty")) $("qaHistory").textContent = uiText("qaEmpty", languagePreference);
+  if ($("customerCard").classList.contains("empty")) $("customerCard").textContent = uiText("pickCustomer", languagePreference);
   popupEnabled = settings.popupEnabled !== false;
   popupDuration = Number(settings.popupDuration) || 3000;
   participantOnly = Boolean(settings.participantOnly);
@@ -47,7 +53,7 @@ async function loadSettings() {
 async function loadCustomers(query = "") {
   try {
     customers = await getCustomers(query);
-    $("customerSelect").innerHTML = '<option value="">Müşteri seçin</option>' + customers.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`).join("");
+    $("customerSelect").innerHTML = `<option value="">${uiText("selectCustomer", languagePreference)}</option>` + customers.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`).join("");
   } catch (error) { setStatus(error.message, true); }
 }
 
@@ -55,7 +61,7 @@ function selectedCustomer() { return customers.find((item) => String(item.id) ==
 function renderCustomer() {
   const customer = selectedCustomer();
   $("customerCard").classList.toggle("empty", !customer);
-  $("customerCard").innerHTML = customer ? `<strong>${escapeHtml(customer.name)}</strong><span>${escapeHtml(customer.contact || "Yetkili belirtilmedi")}</span><small>${escapeHtml(customer.stage || "Aşama yok")} · Skor ${escapeHtml(customer.score ?? "—")}</small>` : "Toplantı başlamadan müşteri seçin.";
+  $("customerCard").innerHTML = customer ? `<strong>${escapeHtml(customer.name)}</strong><span>${escapeHtml(customer.contact || uiText("noContact", languagePreference))}</span><small>${escapeHtml(customer.stage || uiText("noStage", languagePreference))} · ${uiText("score", languagePreference)} ${escapeHtml(customer.score ?? "—")}</small>` : uiText("pickCustomer", languagePreference);
 }
 function setStatus(text, error = false) { $("status").textContent = text; $("status").classList.toggle("error", error); }
 
@@ -63,10 +69,10 @@ function renderUpdate(update) {
   const hidden = !update?.available || update.dismissedVersion === update.latestVersion;
   $("updateBanner").classList.toggle("hidden", hidden);
   if (hidden) return;
-  $("updateTitle").textContent = `${update.latestVersion} sürümü hazır`;
+  $("updateTitle").textContent = uiText("versionReady", languagePreference, { version: update.latestVersion });
   $("updateText").textContent = update.unsupported
-    ? `Kullandığınız ${update.currentVersion} sürümü eski. Verileriniz korunur; en iyi deneyim için uzantıyı güncelleyin.`
-    : `${update.title || "Yeni özellikler ve iyileştirmeler yayınlandı."} Chrome güncellemeyi otomatik uygular.`;
+    ? uiText("unsupported", languagePreference, { current: update.currentVersion })
+    : `${update.title || uiText("updateDefault", languagePreference)}`;
 }
 
 async function loadUpdateStatus() {
@@ -77,7 +83,7 @@ async function loadUpdateStatus() {
 function renderLive(showPopup = false) {
   $("captionCount").textContent = segments.length;
   $("captions").classList.toggle("empty", !segments.length);
-  $("captions").innerHTML = segments.slice(-30).map((item) => `<p><strong>${escapeHtml(item.speaker)}</strong>${escapeHtml(item.text)}</p>`).join("") || "Henüz altyazı yakalanmadı.";
+  $("captions").innerHTML = segments.slice(-30).map((item) => `<p><strong>${escapeHtml(item.speaker)}</strong>${escapeHtml(item.text)}</p>`).join("") || uiText("captionsEmpty", languagePreference);
   suggestions = analyzeTranscript(segments, languagePreference);
   $("suggestionCount").textContent = suggestions.length;
   $("suggestions").classList.remove("empty");
@@ -89,7 +95,7 @@ function renderLive(showPopup = false) {
 function renderQaHistory() {
   $("qaCount").textContent = qaInteractions.length;
   $("qaHistory").classList.toggle("empty", !qaInteractions.length);
-  $("qaHistory").innerHTML = qaInteractions.slice().reverse().map((item) => `<article><small>${escapeHtml(item.speaker)} · ${escapeHtml(item.intent)}</small><strong>${escapeHtml(item.question)}</strong><p>${escapeHtml(item.answer)}</p><span>${escapeHtml(item.sourceTitle || "Doğrulanmış kaynak yok")} · ${escapeHtml(item.confidence)}${item.feedback ? ` · ${escapeHtml(item.feedback)}` : ""}</span></article>`).join("") || "Henüz soru-cevap etkileşimi yok.";
+  $("qaHistory").innerHTML = qaInteractions.slice().reverse().map((item) => `<article><small>${escapeHtml(item.speaker)} · ${escapeHtml(item.intent)}</small><strong>${escapeHtml(item.question)}</strong><p>${escapeHtml(item.answer)}</p><span>${escapeHtml(item.sourceTitle || uiText("noSource", languagePreference))} · ${escapeHtml(item.confidence)}${item.feedback ? ` · ${escapeHtml(item.feedback)}` : ""}</span></article>`).join("") || uiText("qaEmpty", languagePreference);
 }
 
 function showMeetPopup() {
@@ -141,7 +147,7 @@ function scheduleRemoteAnalysis() {
         $("suggestions").innerHTML = suggestions.map((item) => `<article><small>${escapeHtml(item.title || item.eyebrow)}</small><p>${escapeHtml(item.question || item.text)}</p></article>`).join("");
       }
     } catch (error) {
-      if (requestSequence === remoteAnalysisSequence) setStatus(`Yerel öneriler aktif; API analizi gecikti: ${error.message}`, true);
+      if (requestSequence === remoteAnalysisSequence) setStatus(uiText("apiDelay", languagePreference, { error: error.message }), true);
     }
   }, 450);
 }
@@ -152,15 +158,15 @@ function detectCurrentLanguage() {
 
 async function startMeeting() {
   const customer = selectedCustomer();
-  if (!customer) return setStatus("Önce müşteri seçin.", true);
-  if (!$("consent").checked) return setStatus("Katılımcı bilgilendirme onayı zorunludur.", true);
+  if (!customer) return setStatus(uiText("pickFirst", languagePreference), true);
+  if (!$("consent").checked) return setStatus(uiText("consentRequired", languagePreference), true);
   const savedSettings = await chrome.storage.local.get("settings");
   await chrome.storage.local.set({ settings: { ...savedSettings.settings, consentAcknowledged: true } });
   const tab = await findMeetTab();
-  if (!tab) return setStatus("Açık bir Meet, Teams veya Zoom toplantısı bulunamadı.", true);
+  if (!tab) return setStatus(uiText("noMeeting", languagePreference), true);
   try {
     const response = await chrome.tabs.sendMessage(tab.id, { type: "START_CAPTURE" });
-    if (!response?.ok) throw new Error("Toplantı sayfası yakalamayı başlatamadı.");
+    if (!response?.ok) throw new Error(uiText("captureFailed", languagePreference));
     activeTabId = tab.id;
     startedAt = new Date().toISOString();
     segments = [];
@@ -173,15 +179,15 @@ async function startMeeting() {
     $("resultPanel").classList.add("hidden");
     chrome.runtime.sendMessage({ type: "SESSION_START", session: { tabId: activeTabId, customerId: customer.id, platform: platformFromUrl(tab.url), meetingUrl: tab.url, startedAt, segments: [], qaInteractions: [], languagePreference } });
     setStatus(response.visibleCaptionNodes > 0
-      ? "Yakalama aktif. Canlı altyazılar bulundu ve notlar toplanıyor."
-      : "Yakalama aktif; henüz canlı altyazı görünmüyor. Toplantı uygulamasından altyazıları açın.");
-  } catch { setStatus("Toplantı sekmesini yenileyip tekrar deneyin.", true); }
+      ? uiText("capturingFound", languagePreference)
+      : uiText("capturingHidden", languagePreference));
+  } catch { setStatus(uiText("retry", languagePreference), true); }
 }
 
 async function stopMeeting() {
   if (activeTabId) await chrome.tabs.sendMessage(activeTabId, { type: "STOP_CAPTURE" }).catch(() => {});
   const customer = selectedCustomer();
-  if (!customer) return setStatus("Toplantıyı kaydetmeden önce müşteri seçin.", true);
+  if (!customer) return setStatus(uiText("saveCustomerFirst", languagePreference), true);
   const result = summarizeMeeting(segments, suggestions, languagePreference);
   const meetingTab = activeTabId ? await chrome.tabs.get(activeTabId).catch(() => null) : null;
   const payload = {
@@ -201,11 +207,11 @@ async function stopMeeting() {
     const saved = await saveMeeting(payload);
     lastSavedPayload = { ...payload, savedRecord: saved };
     $("summary").textContent = result.summary;
-    $("actionsList").innerHTML = result.actionItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>Belirgin aksiyon bulunamadı.</li>";
+    $("actionsList").innerHTML = result.actionItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || `<li>${uiText("noActions", languagePreference)}</li>`;
     $("resultPanel").classList.remove("hidden");
-    $("saveState").textContent = saved.syncStatus === "mock-saved" ? "Mock kaydedildi" : "Sisteme yazıldı";
-    setStatus("Toplantı tamamlandı ve sisteme kaydedildi.");
-  } catch (error) { setStatus(`Kayıt başarısız: ${error.message}`, true); }
+    $("saveState").textContent = saved.syncStatus === "mock-saved" ? uiText("mockSaved", languagePreference) : uiText("saved", languagePreference);
+    setStatus(uiText("completed", languagePreference));
+  } catch (error) { setStatus(uiText("saveFailed", languagePreference, { error: error.message }), true); }
   activeTabId = null;
   chrome.runtime.sendMessage({ type: "SESSION_STOP" });
   $("startMeeting").disabled = false;
@@ -244,8 +250,8 @@ chrome.runtime.onMessage.addListener((message) => {
   }
   if (message.type === "MEETING_CAPTURE_HEALTH" && message.tabId === activeTabId && !segments.length) {
     setStatus(message.visibleCaptionNodes > 0
-      ? "Altyazı alanı bulundu; konuşma metni bekleniyor."
-      : "Yakalama aktif fakat altyazı bulunamadı. Toplantı uygulamasında canlı altyazıları açın.",
+      ? uiText("captionsFound", languagePreference)
+      : uiText("captionsMissing", languagePreference),
       message.visibleCaptionNodes === 0);
   }
 });
@@ -265,22 +271,23 @@ $("saveSettings").addEventListener("click", async () => {
   if (settings.mode === "api") {
     const origin = new URL(settings.apiBaseUrl).origin + "/*";
     const allowed = await chrome.permissions.request({ origins: [origin] });
-    if (!allowed) return setStatus("API alan adı izni verilmedi.", true);
+    if (!allowed) return setStatus(uiText("apiDenied", languagePreference), true);
   }
   await chrome.storage.local.set({ settings });
   languagePreference = settings.language;
+  applySidepanelCopy(languagePreference);
   popupEnabled = settings.popupEnabled;
   popupDuration = settings.popupDuration;
   participantOnly = settings.participantOnly;
   await loadCustomers();
-  setStatus("Bağlantı ayarları kaydedildi.");
+  setStatus(uiText("settingsSaved", languagePreference));
 });
 $("customerSearch").addEventListener("input", (event) => loadCustomers(event.target.value));
 $("customerSelect").addEventListener("change", renderCustomer);
 $("startMeeting").addEventListener("click", startMeeting);
 $("stopMeeting").addEventListener("click", stopMeeting);
 $("exportJson").addEventListener("click", () => {
-  if (!lastSavedPayload) return setStatus("Dışa aktarılacak tamamlanmış toplantı yok.", true);
+  if (!lastSavedPayload) return setStatus(uiText("noExport", languagePreference), true);
   const blob = new Blob([JSON.stringify(lastSavedPayload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -309,7 +316,7 @@ async function restoreSession() {
   renderQaHistory();
   $("startMeeting").disabled = true;
   $("stopMeeting").disabled = false;
-  setStatus("Açık toplantı oturumu kurtarıldı; not toplama devam ediyor.");
+  setStatus(uiText("restored", languagePreference));
   return true;
 }
 
@@ -318,4 +325,4 @@ await loadUpdateStatus();
 knowledgeArticles = await loadKnowledgeBase().catch(() => []);
 await loadCustomers();
 const meetTab = await findMeetTab();
-if (!await restoreSession()) setStatus(meetTab ? "Toplantı bulundu. Müşteri seçebilir veya otomatik yakalamayı kullanabilirsiniz." : "Meet, Teams veya Zoom toplantısı bekleniyor.");
+if (!await restoreSession()) setStatus(meetTab ? uiText("meetingFound", languagePreference) : uiText("waitingMeeting", languagePreference));

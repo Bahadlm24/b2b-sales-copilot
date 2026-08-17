@@ -20,6 +20,7 @@ export function getAppConfig() {
     apiBaseUrl: trimSlash(runtime.apiBaseUrl ?? envValue("VITE_API_BASE_URL")),
     appPublicUrl: trimSlash(runtime.appPublicUrl ?? envValue("VITE_APP_PUBLIC_URL")),
     persistMode: runtime.persistMode || envValue("VITE_PERSIST_MODE", "local"),
+    locale: runtime.locale || envValue("VITE_APP_LOCALE", ""),
   };
 }
 

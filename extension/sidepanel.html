@@ -2,43 +2,43 @@
 <html lang="tr">
   <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><title>Sales Copilot</title><link rel="stylesheet" href="sidepanel.css" /><style>.update-banner{display:grid;gap:10px;margin-bottom:12px;padding:13px;border:1px solid #b8d66c;border-radius:14px;background:#eff8d8;color:#163c30}.update-banner p{margin:5px 0 0;font-size:11px;line-height:1.45}.update-banner button{justify-self:start}@media(prefers-color-scheme:dark){.update-banner{border-color:#637a39;background:#26351f;color:#edf7da}}</style></head>
   <body>
-    <header><div><small>SALES COPILOT</small><h1>Toplantı Asistanı</h1></div><button id="settingsToggle" class="icon">⚙</button></header>
-    <section id="updateBanner" class="update-banner hidden"><div><strong id="updateTitle">Yeni sürüm hazır</strong><p id="updateText"></p></div><button id="dismissUpdate" class="secondary">Daha sonra</button></section>
+    <header><div><small>SALES COPILOT</small><h1 data-i18n="title">Toplantı Asistanı</h1></div><button id="settingsToggle" class="icon">⚙</button></header>
+    <section id="updateBanner" class="update-banner hidden"><div><strong id="updateTitle" data-i18n="updateTitle">Yeni sürüm hazır</strong><p id="updateText"></p></div><button id="dismissUpdate" class="secondary" data-i18n="later">Daha sonra</button></section>
     <section id="settingsPanel" class="card hidden">
-      <h2>Bağlantı ayarları</h2>
-      <label>Çalışma modu<select id="mode"><option value="mock">Mock / yerel</option><option value="api">API</option></select></label>
-      <label>Toplantı dili<select id="language"><option value="auto">Otomatik (TR / EN)</option><option value="tr">Türkçe öncelikli</option><option value="en">English priority</option></select></label>
-      <label class="check"><input id="autoStart" type="checkbox" /> Toplantıya girince otomatik başlat</label>
-      <label class="check"><input id="popupEnabled" type="checkbox" /> Toplantı üzerinde canlı popup göster</label>
-      <label>Popup süresi<select id="popupDuration"><option value="3000">3 saniye</option><option value="5000">5 saniye</option><option value="7000">7 saniye</option></select></label>
-      <label class="check"><input id="participantOnly" type="checkbox" /> Yalnızca katılımcı konuşmalarında popup göster</label>
-      <label>API adresi<input id="apiBaseUrl" placeholder="http://localhost:3000/api" /></label>
-      <label>Access token<input id="accessToken" type="password" placeholder="Bearer token" /></label>
-      <button id="saveSettings" class="secondary">Ayarları kaydet</button>
+      <h2 data-i18n="settings">Bağlantı ayarları</h2>
+      <label><span data-i18n="mode">Çalışma modu</span><select id="mode"><option value="mock" data-i18n="modeMock">Mock / yerel</option><option value="api" data-i18n="modeApi">API</option></select></label>
+      <label><span data-i18n="language">Toplantı dili</span><select id="language"><option value="auto" data-i18n="langAuto">Otomatik (TR / EN)</option><option value="tr" data-i18n="langTr">Türkçe öncelikli</option><option value="en" data-i18n="langEn">English priority</option></select></label>
+      <label class="check"><input id="autoStart" type="checkbox" /> <span data-i18n="autoStart">Toplantıya girince otomatik başlat</span></label>
+      <label class="check"><input id="popupEnabled" type="checkbox" /> <span data-i18n="popup">Toplantı üzerinde canlı popup göster</span></label>
+      <label><span data-i18n="popupDuration">Popup süresi</span><select id="popupDuration"><option value="3000" data-i18n="sec3">3 saniye</option><option value="5000" data-i18n="sec5">5 saniye</option><option value="7000" data-i18n="sec7">7 saniye</option></select></label>
+      <label class="check"><input id="participantOnly" type="checkbox" /> <span data-i18n="participantOnly">Yalnızca katılımcı konuşmalarında popup göster</span></label>
+      <label><span data-i18n="apiUrl">API adresi</span><input id="apiBaseUrl" placeholder="http://localhost:3000/api" /></label>
+      <label><span data-i18n="token">Access token</span><input id="accessToken" type="password" placeholder="Bearer token" /></label>
+      <button id="saveSettings" class="secondary" data-i18n="saveSettings">Ayarları kaydet</button>
     </section>
     <section class="card">
-      <label>Müşteri ara<input id="customerSearch" placeholder="Firma veya yetkili" /></label>
+      <label><span data-i18n="searchCustomer">Müşteri ara</span><input id="customerSearch" data-i18n-placeholder="searchPh" placeholder="Firma veya yetkili" /></label>
       <select id="customerSelect"><option value="">Müşteri seçin</option></select>
       <div id="customerCard" class="customer empty">Toplantı başlamadan müşteri seçin.</div>
     </section>
     <section class="card consent">
-      <label class="check"><input id="consent" type="checkbox" /> Katılımcıların bilgilendirildiğini ve toplantı notlarının işlenmesine izin verildiğini onaylıyorum.</label>
-      <div class="actions"><button id="startMeeting" class="primary">Toplantıyı başlat</button><button id="stopMeeting" class="danger" disabled>Bitir ve kaydet</button></div>
+      <label class="check"><input id="consent" type="checkbox" /> <span data-i18n="consent">Katılımcıların bilgilendirildiğini ve toplantı notlarının işlenmesine izin verildiğini onaylıyorum.</span></label>
+      <div class="actions"><button id="startMeeting" class="primary" data-i18n="start">Toplantıyı başlat</button><button id="stopMeeting" class="danger" disabled data-i18n="stop">Bitir ve kaydet</button></div>
       <p id="status" class="status">Google Meet sekmesi bekleniyor.</p>
     </section>
     <section class="card">
-      <div class="section-title"><h2>Canlı öneriler</h2><span id="suggestionCount">0</span></div>
+      <div class="section-title"><h2 data-i18n="suggestions">Canlı öneriler</h2><span id="suggestionCount">0</span></div>
       <div id="suggestions" class="list empty">Konuşma başladığında sorular burada görünecek.</div>
     </section>
     <section class="card">
-      <div class="section-title"><h2>Toplantı notları</h2><span id="captionCount">0</span></div>
+      <div class="section-title"><h2 data-i18n="notes">Toplantı notları</h2><span id="captionCount">0</span></div>
       <div id="captions" class="captions empty">Henüz altyazı yakalanmadı.</div>
     </section>
     <section class="card">
-      <div class="section-title"><h2>Soru ve cevap geçmişi</h2><span id="qaCount">0</span></div>
+      <div class="section-title"><h2 data-i18n="qa">Soru ve cevap geçmişi</h2><span id="qaCount">0</span></div>
       <div id="qaHistory" class="qa-history empty">Henüz soru-cevap etkileşimi yok.</div>
     </section>
-    <section id="resultPanel" class="card hidden"><div class="section-title"><h2>Toplantı özeti</h2><span id="saveState">Bekliyor</span></div><p id="summary"></p><h3>Aksiyonlar</h3><ul id="actionsList"></ul><button id="exportJson" class="secondary">JSON dışa aktar</button></section>
+    <section id="resultPanel" class="card hidden"><div class="section-title"><h2 data-i18n="summary">Toplantı özeti</h2><span id="saveState" data-i18n="waiting">Bekliyor</span></div><p id="summary"></p><h3 data-i18n="actions">Aksiyonlar</h3><ul id="actionsList"></ul><button id="exportJson" class="secondary" data-i18n="export">JSON dışa aktar</button></section>
     <script type="module" src="sidepanel.js"></script>
   </body>
 </html>

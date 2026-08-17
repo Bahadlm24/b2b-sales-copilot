@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sales Copilot — Tanıtım</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "DM Sans", Arial, sans-serif;
+      color: #17211d;
+      background: #fff;
+    }
+    .page {
+      width: 210mm;
+      height: 297mm;
+      padding: 16mm 18mm 18mm;
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+    .page:last-child { page-break-after: auto; }
+    h1 { font-size: 28px; letter-spacing: -0.04em; margin: 0 0 8px; }
+    h2 { font-size: 18px; margin: 0 0 12px; color: #163c30; }
+    h3 { font-size: 13px; margin: 0 0 6px; letter-spacing: 0.08em; text-transform: uppercase; color: #477664; }
+    p { margin: 0 0 10px; font-size: 12.5px; line-height: 1.55; color: #2a3530; }
+    .muted { color: #6c7570; font-size: 11px; }
+    .cover {
+      background: #163c30;
+      color: #e8efeb;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .cover h1, .cover p, .cover h2 { color: #e8efeb; }
+    .mark {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: #c7f067; color: #163c30;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 16px; }
+    .hero { margin-top: 48px; }
+    .hero h1 { font-size: 42px; line-height: 1.08; max-width: 150mm; }
+    .hero .lead { font-size: 16px; line-height: 1.5; max-width: 145mm; color: #c5d6ce; }
+    .lime { color: #c7f067; }
+    .cover-foot { display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,.15); padding-top: 14px; font-size: 11px; color: #9eb5ac; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card {
+      border: 1px solid #dfe5e1; border-radius: 10px; padding: 12px 14px; background: #f7f9f8;
+    }
+    .card strong { display: block; margin-bottom: 4px; font-size: 13px; color: #163c30; }
+    .card span { font-size: 11.5px; line-height: 1.45; color: #4a5751; }
+    .flow {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      margin: 14px 0 18px; font-size: 11px; font-weight: 700; color: #163c30;
+    }
+    .flow b { color: #9aa8a1; font-weight: 500; }
+    .chip { background: #eef4f0; border-radius: 999px; padding: 6px 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-top: 8px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e3e9e6; vertical-align: top; }
+    th { color: #718079; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .bar { height: 6px; background: #e8eeea; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+    .bar > i { display: block; height: 100%; background: #163c30; }
+    .footer {
+      position: absolute; left: 18mm; right: 18mm; bottom: 12mm;
+      display: flex; justify-content: space-between; font-size: 10px; color: #8a948e;
+    }
+    ul { margin: 0; padding-left: 16px; }
+    li { font-size: 12px; line-height: 1.5; margin-bottom: 4px; }
+    .note { margin-top: 14px; padding: 12px 14px; background: #163c30; color: #e8efeb; border-radius: 10px; font-size: 12px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <section class="page cover">
+    <div class="brand"><span class="mark">S</span> Sales Copilot</div>
+    <div class="hero">
+      <p class="muted" style="color:#a9c2b8; letter-spacing:.14em; text-transform:uppercase; font-weight:700;">B2B satış çalışma alanı</p>
+      <h1>Görüşmedeki sinyali<br><span class="lime">sonraki adıma</span> çevirin.</h1>
+      <p class="lead">Lead, müşteri, teklif, takip ve toplantı içgörüsü tek yerde. Chrome eklentisi Meet, Teams ve Zoom altyazısından canlı öneri üretir.</p>
+    </div>
+    <div class="cover-foot">
+      <span>v0.1 · Yerel ilk ürün / canlı statik demo</span>
+      <span>Ağustos 2026</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <h3>Sorun</h3>
+    <h2>Satış notu dağılır, fırsat soğur.</h2>
+    <p>Görüşme bir yerde, teklif başka tabloda, takip kişisel hatırlatmada kalır. Karar verici, itiraz ve sonraki adım toplantı bittiğinde kaybolur.</p>
+    <div class="flow">
+      <span class="chip">Lead</span><b>→</b>
+      <span class="chip">Müşteri</span><b>→</b>
+      <span class="chip">Görüşme</span><b>→</b>
+      <span class="chip">Teklif</span><b>→</b>
+      <span class="chip">Kazan / Kaybet</span>
+    </div>
+    <h3>Ürün</h3>
+    <div class="grid">
+      <div class="card"><strong>Satış hattı</strong><span>Lead havuzu, müşteri kartı, sorumlu atama, arşiv, teklif revizyonu ve zorunlu kapanış nedeni.</span></div>
+      <div class="card"><strong>Toplantı asistanı</strong><span>Konuşmadaki fiyat, entegrasyon, karar ve rekabet sinyallerinden 4–7 içgörü ve sonraki toplantı planı.</span></div>
+      <div class="card"><strong>Canlı eklenti</strong><span>Meet, Teams ve Zoom web altyazısını okur. Gizli ses kaydı yok. Kaynaklı cevap, geri bildirim, JSON dışa aktarma.</span></div>
+      <div class="card"><strong>Yönetim</strong><span>Rol ve kişi bazlı izin, bildirim merkezi, pipeline tahmini, personel analitiği, audit geçmişi.</span></div>
+    </div>
+    <p class="muted" style="margin-top:16px;">Hedef kullanıcı: kurumsal B2B satış ekibi, satış yöneticisi ve satış operasyonu. Analist pipeline ve dönüşüm raporunu görür; temsilci sahada görüşmeyi ilerletir.</p>
+    <div class="footer"><span>Sales Copilot · Tanıtım</span><span>2 / 4</span></div>
+  </section>
+
+  <section class="page">
+    <h3>Yetenekler</h3>
+    <h2>Bugün teslim edilen kapsam</h2>
+    <table>
+      <thead><tr><th>Modül</th><th>Ne işe yarar</th></tr></thead>
+      <tbody>
+        <tr><td>Lead ve müşteri</td><td>Excel aktarımı, TR telefon normalizasyonu, mükerrer kontrol, lead’den müşteriye dönüşüm</td></tr>
+        <tr><td>Teklif</td><td>Oluşturma, revizyon geçmişi, olasılıklı pipeline, kazan/kaybet nedeni, iptal</td></tr>
+        <tr><td>Takip ve bildirim</td><td>Geciken görev, yaklaşan teklif, uzun süredir temas edilmeyen müşteri</td></tr>
+        <tr><td>Toplantı takibi</td><td>Tur sayısı, zorunlu sonuç, olumlu lead’in müşteriye bağlanması</td></tr>
+        <tr><td>Rapor</td><td>Personel, kanal, dönüşüm ve ağırlıklı gelir tek kaynaktan</td></tr>
+        <tr><td>Eklenti</td><td>Altyazıdan canlı soru, bilgi tabanı cevabı, oturum kurtarma</td></tr>
+      </tbody>
+    </table>
+    <h3 style="margin-top:22px;">Şu anki sınır</h3>
+    <p>v0.1 tarayıcıda çalışır. Ekip ortak kaydı, gerçek e-posta ve dil modeli analizi sunucu ister. Canlı statik demo HTTPS’te açılır; veri cihazdadır.</p>
+    <div class="note">Demo girişi: kullanıcı adı <strong>admin</strong> · şifre <strong>1234</strong> — yalnızca test ortamı. Gerçek müşteri verisi konmaz.</div>
+    <div class="footer"><span>Sales Copilot · Tanıtım</span><span>3 / 4</span></div>
+  </section>
+
+  <section class="page">
+    <h3>Yol haritası</h3>
+    <h2>Nereye gidiyor</h2>
+    <table>
+      <thead><tr><th>Faz</th><th>Süre</th><th>Çıkış</th></tr></thead>
+      <tbody>
+        <tr><td>0 · Canlı statik test</td><td>1–2 hafta</td><td>HTTPS demo, kısıtlı erişim</td></tr>
+        <tr><td>1 · Ortak çekirdek</td><td>4–8 hafta</td><td>API, PostgreSQL, gerçek giriş, ekip paylaşımı</td></tr>
+        <tr><td>2 · Gerçek kopilot</td><td>4–6 hafta</td><td>Sunucu analizi, müşteri bağlamı, kalite geri bildirimi</td></tr>
+        <tr><td>3 · Kanallar</td><td>6–8 hafta</td><td>Meta / Ads / form webhook, SMTP, takvim</td></tr>
+        <tr><td>4 · Ölçek</td><td>Sürekli</td><td>E2E test, izleme, Chrome Web Store</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:16px;">Önce ortak veri. Sonra dil modeli. Yeni yönetim ekranı eklenmez.</p>
+    <div class="grid" style="margin-top:8px;">
+      <div>
+        <h3>Faz 1 ilerleme</h3>
+        <p class="muted">Kimlik ve veritabanı</p>
+        <div class="bar"><i style="width:15%"></i></div>
+      </div>
+      <div>
+        <h3>Ürün kapsamı</h3>
+        <p class="muted">Yerel satış döngüsü</p>
+        <div class="bar"><i style="width:85%"></i></div>
+      </div>
+    </div>
+    <h3 style="margin-top:28px;">İletişim notu</h3>
+    <p>Fiyat; kullanıcı sayısı, kapsam, entegrasyon ve destek seviyesine göre netleşir. Bu belge teklif değildir. Güncel yol haritası: <strong>ROADMAP.md</strong> · yayın: <strong>DEPLOY.md</strong></p>
+    <div class="footer"><span>Sales Copilot · Tanıtım</span><span>4 / 4</span></div>
+  </section>
+</body>
+</html>

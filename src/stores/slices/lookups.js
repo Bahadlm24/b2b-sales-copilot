@@ -1,3 +1,5 @@
+import { t } from "../../i18n/localeStore.js";
+
 export function createLookupsSlice({ state }) {
   return {
     can(permission) {
@@ -5,7 +7,9 @@ export function createLookupsSlice({ state }) {
       return Boolean(user?.active && user.permissions?.includes(permission));
     },
     roleLabel(roleKey) {
-      return state.roleDefinitions.find((role) => role.key === roleKey)?.label || "Tanımsız rol";
+      const translated = t(`roles.${roleKey}`);
+      if (translated !== `roles.${roleKey}`) return translated;
+      return state.roleDefinitions.find((role) => role.key === roleKey)?.label || t("roles.unknown");
     },
     setClientContext(context) {
       state.clientContext = {
@@ -14,14 +18,14 @@ export function createLookupsSlice({ state }) {
       };
     },
     customerName(customerId) {
-      return state.customers.find((customer) => customer.id === Number(customerId))?.name || "Bilinmeyen müşteri";
+      return state.customers.find((customer) => customer.id === Number(customerId))?.name || t("store.unknownCustomer");
     },
     userName(userId) {
-      return state.users.find((user) => user.id === Number(userId))?.name || "Atanmamış";
+      return state.users.find((user) => user.id === Number(userId))?.name || t("store.unassigned");
     },
     journeyEntityName(journey) {
       return journey.entityType === "lead"
-        ? state.leads.find((item) => item.id === Number(journey.entityId))?.company || state.leads.find((item) => item.id === Number(journey.entityId))?.name || "Bilinmeyen lead"
+        ? state.leads.find((item) => item.id === Number(journey.entityId))?.company || state.leads.find((item) => item.id === Number(journey.entityId))?.name || t("store.unknownLead")
         : this.customerName(journey.entityId);
     },
   };

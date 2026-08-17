@@ -1,14 +1,15 @@
 import { formatPhoneNumber } from "../../services/phoneFormatter.js";
+import { dateLocale, t } from "../../i18n/localeStore.js";
 
 export function createCustomersSlice({ state, persist, nextLocalId, changeDetails, audit, recordActivity }) {
   return {
     addCustomer(customer) {
       const phone = formatPhoneNumber(customer.phone);
       if (!customer.name?.trim() || !phone) {
-        return { ok: false, message: "Firma adı ve telefon zorunludur." };
+        return { ok: false, message: t("store.companyPhoneRequired") };
       }
       if (state.customers.some((item) => formatPhoneNumber(item.phone) === phone)) {
-        return { ok: false, message: "Bu telefon numarasıyla kayıtlı bir müşteri zaten var." };
+        return { ok: false, message: t("store.customerPhoneExists") };
       }
       const now = new Date();
       const name = customer.name.trim();
@@ -16,14 +17,14 @@ export function createCustomersSlice({ state, persist, nextLocalId, changeDetail
         id: nextLocalId(),
         name,
         initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toLocaleUpperCase("tr-TR"),
-        contact: customer.contact?.trim() || "Yetkili belirtilmedi",
-        role: customer.role?.trim() || "Görev belirtilmedi",
+        contact: customer.contact?.trim() || t("store.noContact"),
+        role: customer.role?.trim() || t("store.noRole"),
         stage: customer.stage || "İlk görüşme",
         score: Number(customer.score) || 50,
-        lastContact: now.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }),
+        lastContact: now.toLocaleDateString(dateLocale.value, { day: "numeric", month: "long", year: "numeric" }),
         lastContactDate: now.toISOString().slice(0, 10),
-        sector: customer.sector?.trim() || "Belirtilmedi",
-        city: customer.city?.trim() || "Belirtilmedi",
+        sector: customer.sector?.trim() || t("store.unspecified"),
+        city: customer.city?.trim() || t("store.unspecified"),
         phone,
         email: customer.email?.trim() || "",
         revenue: customer.revenue?.trim() || "₺0",
@@ -39,12 +40,12 @@ export function createCustomersSlice({ state, persist, nextLocalId, changeDetail
     },
     updateCustomer(id, changes) {
       const customer = state.customers.find((item) => item.id === Number(id));
-      if (!customer) return { ok: false, message: "Müşteri kaydı bulunamadı." };
+      if (!customer) return { ok: false, message: t("store.customerMissing") };
       const name = changes.name?.trim();
       const phone = changes.phone ? formatPhoneNumber(changes.phone) : customer.phone;
-      if (!name || !phone) return { ok: false, message: "Firma adı ve telefon zorunludur." };
+      if (!name || !phone) return { ok: false, message: t("store.companyPhoneRequired") };
       if (state.customers.some((item) => item.id !== customer.id && formatPhoneNumber(item.phone) === phone)) {
-        return { ok: false, message: "Bu telefon numarası başka bir müşteride kayıtlı." };
+        return { ok: false, message: t("store.customerPhoneOther") };
       }
       const before = {
         name: customer.name,
@@ -62,12 +63,12 @@ export function createCustomersSlice({ state, persist, nextLocalId, changeDetail
       Object.assign(customer, {
         name,
         initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toLocaleUpperCase("tr-TR"),
-        contact: changes.contact?.trim() || "Yetkili belirtilmedi",
-        role: changes.role?.trim() || "Görev belirtilmedi",
+        contact: changes.contact?.trim() || t("store.noContact"),
+        role: changes.role?.trim() || t("store.noRole"),
         phone,
         email: changes.email?.trim() || "",
-        sector: changes.sector?.trim() || "Belirtilmedi",
-        city: changes.city?.trim() || "Belirtilmedi",
+        sector: changes.sector?.trim() || t("store.unspecified"),
+        city: changes.city?.trim() || t("store.unspecified"),
         stage: changes.stage || customer.stage,
         score: Number(changes.score ?? customer.score),
         revenue: changes.revenue?.trim() || "₺0",

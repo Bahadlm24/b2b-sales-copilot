@@ -1,6 +1,7 @@
 import { formatPhoneNumber } from "../../services/phoneFormatter.js";
 import { normalizeInboundLead } from "../../services/inboundLeadService.js";
 import { isSyncDue, nextSyncTime } from "../../services/syncScheduler.js";
+import { t } from "../../i18n/localeStore.js";
 
 export function createIntegrationsSlice({ state, persist, nextLocalId, changeDetails, audit }, store) {
   return {
@@ -31,13 +32,13 @@ export function createIntegrationsSlice({ state, persist, nextLocalId, changeDet
       const config = state.inboundSettings.sources[sourceKey];
       const receivedAt = new Date().toISOString();
       const log = { id: nextLocalId(), sourceKey, receivedAt, status: "rejected", message: "", externalLeadId: payload?.lead_id || payload?.id || null };
-      if (!config?.enabled) log.message = "Kaynak bağlantısı pasif.";
-      else if (token !== config.token) log.message = "Webhook anahtarı geçersiz.";
+      if (!config?.enabled) log.message = t("store.inboundDisabled");
+      else if (token !== config.token) log.message = t("store.inboundToken");
       else {
         const lead = normalizeInboundLead(sourceKey, payload);
         const phone = formatPhoneNumber(lead?.phone);
-        if (!phone) log.message = "Telefon alanı zorunludur.";
-        else if (state.leads.some((item) => formatPhoneNumber(item.phone) === phone) || state.customers.some((item) => formatPhoneNumber(item.phone) === phone)) log.message = "Bu telefon numarası zaten kayıtlı; mükerrer data alınmadı.";
+        if (!phone) log.message = t("store.inboundPhone");
+        else if (state.leads.some((item) => formatPhoneNumber(item.phone) === phone) || state.customers.some((item) => formatPhoneNumber(item.phone) === phone)) log.message = t("store.inboundDuplicate");
         else {
           const record = store.addLead({ ...lead, phone });
           record.inboundReceivedAt = receivedAt;
@@ -45,7 +46,7 @@ export function createIntegrationsSlice({ state, persist, nextLocalId, changeDet
           config.received += 1;
           config.lastReceivedAt = receivedAt;
           log.status = "accepted";
-          log.message = "Lead havuzuna eklendi.";
+          log.message = t("store.inboundAccepted");
           log.leadId = record.id;
         }
       }

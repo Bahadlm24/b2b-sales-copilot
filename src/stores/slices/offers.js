@@ -1,5 +1,6 @@
+import { formatMoney, t } from "../../i18n/localeStore.js";
+
 export function createOffersSlice({ state, persist, nextLocalId, changeDetails, audit, recordActivity }) {
-  const money = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
   return {
     updateOffer(id, changes) {
       const offer = state.offers.find((item) => item.id === Number(id));
@@ -17,7 +18,7 @@ export function createOffersSlice({ state, persist, nextLocalId, changeDetails, 
         probability: Number(changes.probability ?? offer.probability),
         validUntil: changes.validUntil?.trim() || offer.validUntil,
         numericAmount,
-        amount: money.format(numericAmount),
+        amount: formatMoney(numericAmount),
         ownerId: Number(changes.ownerId) || offer.ownerId || state.currentUserId,
         outcomeReason: ["Kazanıldı", "Kaybedildi"].includes(changes.status)
           ? changes.outcomeReason?.trim() || offer.outcomeReason || ""
@@ -30,7 +31,7 @@ export function createOffersSlice({ state, persist, nextLocalId, changeDetails, 
         validUntil: offer.validUntil, numericAmount: offer.numericAmount, amount: offer.amount,
         ownerId: offer.ownerId, outcomeReason: offer.outcomeReason,
       };
-      const revision = { id: nextLocalId(), createdAt: new Date().toISOString(), actorName: state.users.find((user) => user.id === state.currentUserId)?.name || "Sistem", ...changeDetails(before, after) };
+      const revision = { id: nextLocalId(), createdAt: new Date().toISOString(), actorName: state.users.find((user) => user.id === state.currentUserId)?.name || t("store.system"), ...changeDetails(before, after) };
       if (revision.changedFields.length) offer.revisions.unshift(revision);
       audit("offer.updated", "offer", offer.id, changeDetails(before, after));
       persist();
@@ -55,7 +56,7 @@ export function createOffersSlice({ state, persist, nextLocalId, changeDetails, 
       offer.outcomeReason = reason.trim();
       offer.updatedAt = new Date().toISOString();
       const after = { cancelled: offer.cancelled, status: offer.status, outcomeReason: offer.outcomeReason };
-      offer.revisions.unshift({ id: nextLocalId(), createdAt: offer.updatedAt, actorName: state.users.find((user) => user.id === state.currentUserId)?.name || "Sistem", ...changeDetails(before, after) });
+      offer.revisions.unshift({ id: nextLocalId(), createdAt: offer.updatedAt, actorName: state.users.find((user) => user.id === state.currentUserId)?.name || t("store.system"), ...changeDetails(before, after) });
       recordActivity("customer", offer.customerId, "offer", "Teklif iptal edildi", offer.outcomeReason);
       audit("offer.cancelled", "offer", offer.id, changeDetails(before, after));
       persist();
@@ -65,7 +66,7 @@ export function createOffersSlice({ state, persist, nextLocalId, changeDetails, 
       const customer = state.customers.find((item) => item.id === Number(offer.customerId) && !item.archived);
       const numericAmount = Number(offer.numericAmount);
       if (!customer || !offer.title?.trim() || !Number.isFinite(numericAmount) || numericAmount <= 0) {
-        return { ok: false, message: "Müşteri, teklif başlığı ve sıfırdan büyük tutar zorunludur." };
+        return { ok: false, message: t("store.offerRequired") };
       }
       const year = new Date().getFullYear();
       const sequence = String(state.offers.length + 1).padStart(4, "0");
@@ -75,7 +76,7 @@ export function createOffersSlice({ state, persist, nextLocalId, changeDetails, 
         customer: customer.name,
         no: `TKL-${year}-${sequence}`,
         title: offer.title.trim(),
-        amount: money.format(numericAmount),
+        amount: formatMoney(numericAmount),
         numericAmount,
         status: "Hazırlanıyor",
         validUntil: offer.validUntil,

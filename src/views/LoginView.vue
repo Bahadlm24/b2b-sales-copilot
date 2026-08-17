@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import LanguageToggle from "../components/LanguageToggle.vue";
+import { t } from "../i18n/localeStore.js";
 import { salesStore } from "../stores/salesStore";
 
 const router = useRouter();
@@ -32,31 +34,32 @@ function changeMode(nextMode) {
     <section class="login-brand">
       <span class="brand-mark large-mark">{{ salesStore.state.organization.brandMark }}</span>
       <strong class="login-product-name">{{ salesStore.state.organization.productName }}</strong>
-      <p class="eyebrow light">B2B SATIŞ ÇALIŞMA ALANI</p>
-      <h1>Satış ekibinin karar merkezi.</h1>
-      <p>{{ salesStore.state.organization.name }} için müşterileri, teklifleri, takipleri ve toplantı içgörülerini tek yerde yönet.</p>
+      <p class="eyebrow light">{{ t("login.workspace") }}</p>
+      <h1>{{ t("login.headline") }}</h1>
+      <p>{{ t("login.intro", { org: salesStore.state.organization.name }) }}</p>
     </section>
     <section class="login-card">
+      <div class="login-locale"><LanguageToggle /></div>
       <div v-if="mode === 'login'">
-        <p class="eyebrow">GÜVENLİ GİRİŞ</p>
-        <h2>Hesabına giriş yap</h2>
-        <p class="login-description">Devam etmek için kullanıcı bilgilerini gir.</p>
+        <p class="eyebrow">{{ t("login.secure") }}</p>
+        <h2>{{ t("login.title") }}</h2>
+        <p class="login-description">{{ t("login.description") }}</p>
         <form class="task-form" @submit.prevent="login">
-          <label><span>Kullanıcı adı</span><input v-model="loginForm.username" class="search-input" autocomplete="username" required /></label>
-          <label><span>Şifre</span><input v-model="loginForm.password" class="search-input" type="password" autocomplete="current-password" required /></label>
-          <button class="primary-button" type="submit">Giriş yap</button>
+          <label><span>{{ t("login.username") }}</span><input v-model="loginForm.username" class="search-input" autocomplete="username" required /></label>
+          <label><span>{{ t("login.password") }}</span><input v-model="loginForm.password" class="search-input" type="password" autocomplete="current-password" required /></label>
+          <button class="primary-button" type="submit">{{ t("login.submit") }}</button>
         </form>
-        <button class="forgot-button" @click="changeMode('forgot')">Şifremi unuttum</button>
-        <div class="demo-credentials"><strong>Mock yönetici hesabı</strong><span>Kullanıcı: admin · Şifre: 1234</span></div>
+        <button class="forgot-button" @click="changeMode('forgot')">{{ t("login.forgot") }}</button>
+        <div class="demo-credentials"><strong>{{ t("login.demoTitle") }}</strong><span>{{ t("login.demoHint") }}</span></div>
       </div>
       <div v-else>
-        <button class="back-button" @click="changeMode('login')">← Giriş ekranına dön</button>
-        <p class="eyebrow">ŞİFRE HATIRLATMA</p>
-        <h2>E-posta adresini gir</h2>
-        <p class="login-description">Kayıtlı hesaba ait giriş bilgisi mock e-posta kuyruğuna eklenecek.</p>
+        <button class="back-button" @click="changeMode('login')">{{ t("login.back") }}</button>
+        <p class="eyebrow">{{ t("login.remindEyebrow") }}</p>
+        <h2>{{ t("login.remindTitle") }}</h2>
+        <p class="login-description">{{ t("login.remindDescription") }}</p>
         <form class="task-form" @submit.prevent="remindPassword">
-          <label><span>E-posta</span><input v-model="reminderEmail" class="search-input" type="email" autocomplete="email" required /></label>
-          <button class="primary-button" type="submit">Bilgilendirme gönder</button>
+          <label><span>{{ t("common.email") }}</span><input v-model="reminderEmail" class="search-input" type="email" autocomplete="email" required /></label>
+          <button class="primary-button" type="submit">{{ t("login.send") }}</button>
         </form>
       </div>
       <p v-if="feedback" class="login-feedback" role="status">{{ feedback }}</p>

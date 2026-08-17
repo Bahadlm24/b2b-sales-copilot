@@ -1,4 +1,5 @@
 import { formatPhoneNumber } from "../../services/phoneFormatter.js";
+import { t } from "../../i18n/localeStore.js";
 
 export function createLeadsSlice({ state, persist, nextLocalId, changeDetails, audit, recordActivity }, store) {
   return {
@@ -21,10 +22,10 @@ export function createLeadsSlice({ state, persist, nextLocalId, changeDetails, a
     },
     convertLeadToCustomer(id) {
       const lead = state.leads.find((item) => item.id === Number(id));
-      if (!lead) return { ok: false, message: "Lead bulunamadı." };
-      if (lead.convertedCustomerId) return { ok: false, message: "Bu lead daha önce müşteriye dönüştürüldü.", customerId: lead.convertedCustomerId };
+      if (!lead) return { ok: false, message: t("store.leadMissing") };
+      if (lead.convertedCustomerId) return { ok: false, message: t("store.leadAlreadyConverted"), customerId: lead.convertedCustomerId };
       const result = store.addCustomer({
-        name: lead.company?.trim() || lead.name?.trim() || "İsimsiz müşteri",
+        name: lead.company?.trim() || lead.name?.trim() || t("store.unnamedCustomer"),
         contact: lead.name,
         phone: lead.phone,
         email: lead.email,

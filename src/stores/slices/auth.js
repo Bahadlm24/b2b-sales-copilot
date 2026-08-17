@@ -1,4 +1,5 @@
 import { isTokenValid, issueTokenSession, refreshTokenSession } from "../../services/tokenService.js";
+import { t } from "../../i18n/localeStore.js";
 
 export function createAuthSlice({ state, persist, nextLocalId, audit }) {
   return {
@@ -12,10 +13,10 @@ export function createAuthSlice({ state, persist, nextLocalId, audit }) {
           null,
           { username: normalizedUsername },
           "failed",
-          { id: null, name: normalizedUsername || "Anonim" },
-          { statusCode: 401, message: "Kullanıcı adı veya şifre hatalı" },
+          { id: null, name: normalizedUsername || t("store.anonymous") },
+          { statusCode: 401, message: t("store.invalidCredentialsAudit") },
         );
-        return { ok: false, message: "Kullanıcı adı veya şifre hatalı." };
+        return { ok: false, message: t("store.invalidCredentials") };
       }
       if (!user.active) {
         audit(
@@ -25,9 +26,9 @@ export function createAuthSlice({ state, persist, nextLocalId, audit }) {
           { username: normalizedUsername },
           "failed",
           { id: user.id, name: user.name },
-          { statusCode: 403, message: "Kullanıcı hesabı pasif" },
+          { statusCode: 403, message: t("store.inactiveAudit") },
         );
-        return { ok: false, message: "Bu kullanıcı hesabı pasif durumda." };
+        return { ok: false, message: t("store.inactiveUser") };
       }
       state.currentUserId = user.id;
       state.isAuthenticated = true;
@@ -39,12 +40,12 @@ export function createAuthSlice({ state, persist, nextLocalId, audit }) {
         { tokenExpiresAt: state.tokenSession.expiresAt },
         "success",
         user,
-        { statusCode: 200, message: "Giriş başarılı" },
+        { statusCode: 200, message: t("store.loginOk") },
       );
       return { ok: true, user };
     },
     logout() {
-      audit("auth.logout", "session", null, {}, "success", null, { statusCode: 200, message: "Çıkış başarılı" });
+      audit("auth.logout", "session", null, {}, "success", null, { statusCode: 200, message: t("store.logoutOk") });
       state.isAuthenticated = false;
       state.tokenSession = null;
     },
@@ -58,7 +59,7 @@ export function createAuthSlice({ state, persist, nextLocalId, audit }) {
     },
     tokenPreview() {
       const token = state.tokenSession?.accessToken;
-      return token ? `${token.slice(0, 14)}••••••••` : "Token yok";
+      return token ? `${token.slice(0, 14)}••••••••` : t("store.noToken");
     },
     requestPasswordReminder(email) {
       const normalizedEmail = email.trim().toLowerCase();
@@ -67,18 +68,18 @@ export function createAuthSlice({ state, persist, nextLocalId, audit }) {
         state.mailOutbox.unshift({
           id: nextLocalId(),
           to: user.email,
-          subject: `${state.organization.productName} giriş bilgisi`,
-          message: `Merhaba ${user.name}, kullanıcı adınız: ${user.username}. Geçici mock şifreniz: ${user.password}`,
+          subject: t("store.mailSubject", { product: state.organization.productName }),
+          message: t("store.mailBody", { name: user.name, username: user.username, password: user.password }),
           createdAt: new Date().toISOString(),
         });
         audit(
           "mail.queued",
           "mail",
           state.mailOutbox[0].id,
-          { to: user.email, subject: `${state.organization.productName} giriş bilgisi` },
+          { to: user.email, subject: t("store.mailSubject", { product: state.organization.productName }) },
           "success",
           null,
-          { statusCode: 202, message: "E-posta kuyruğa alındı" },
+          { statusCode: 202, message: t("store.mailQueued") },
         );
         persist();
       }
@@ -88,10 +89,10 @@ export function createAuthSlice({ state, persist, nextLocalId, audit }) {
         null,
         { email: normalizedEmail, accountMatched: Boolean(user) },
         "success",
-        user || { id: null, name: "Anonim" },
-        { statusCode: 202, message: "Şifre hatırlatma isteği alındı" },
+        user || { id: null, name: t("store.anonymous") },
+        { statusCode: 202, message: t("store.reminderAudit") },
       );
-      return { ok: true, message: "Adres sistemde kayıtlıysa giriş bilgisi e-posta kuyruğuna eklendi." };
+      return { ok: true, message: t("store.reminderOk") };
     },
     switchUser(id) {
       const user = state.users.find((item) => item.id === Number(id) && item.active);

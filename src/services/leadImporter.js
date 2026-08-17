@@ -1,4 +1,5 @@
 import { formatPhoneNumber } from "./phoneFormatter.js";
+import { t } from "../i18n/localeStore.js";
 
 function normalizeHeader(value) {
   return String(value ?? "")
@@ -29,17 +30,17 @@ export function prepareLeadImport(rows, existingLeads = []) {
     const phone = formatPhoneNumber(phoneInput);
     const key = phoneKey(phone);
     let status = "ready";
-    let message = "Aktarıma hazır";
+    let message = t("importer.ready");
 
     if (!phoneInput) {
       status = "error";
-      message = "Telefon numarası zorunludur";
+      message = t("importer.phoneRequired");
     } else if (key.length < 7) {
       status = "error";
-      message = "Telefon numarası geçersiz";
+      message = t("importer.phoneInvalid");
     } else if (existingPhones.has(key) || filePhones.has(key)) {
       status = "duplicate";
-      message = "Bu kişinin telefon numarası kayıtlı";
+      message = t("importer.duplicate");
     } else {
       filePhones.add(key);
     }

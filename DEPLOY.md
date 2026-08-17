@@ -54,7 +54,8 @@ window.__SALES_COPILOT_CONFIG__ = {
   mode: "live-static",
   apiBaseUrl: "https://crm.example.com/api",
   appPublicUrl: "https://crm.example.com",
-  persistMode: "local"
+  persistMode: "local",
+  locale: ""
 };
 ```
 
@@ -64,6 +65,7 @@ window.__SALES_COPILOT_CONFIG__ = {
 | `apiBaseUrl` | Backend yoksa `""` bırakın. Varsa `/api` ile biten kök. |
 | `appPublicUrl` | HTTPS uygulama adresi. |
 | `persistMode` | Backend bağlanana kadar `local`. |
+| `locale` | Varsayılan arayüz dili: `"tr"`, `"en"` veya `""` (tarayıcı / Türkçe). Kullanıcı seçimi bunu ezer. |
 
 Bu dosya `src/config/appConfig.js` tarafından okunur. Entegrasyonlar ekranındaki varsayılan webhook kökü boş `localStorage` ile ilk açılışta `apiBaseUrl` (yoksa `http://localhost:3000/api`) olur. Tarayıcıda eski kayıt varsa Ayarlar / Entegrasyonlar ekranından adresi güncelleyin veya site verisini temizleyin.
 

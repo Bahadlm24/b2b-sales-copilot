@@ -1,3 +1,4 @@
+import { t } from "../../i18n/localeStore.js";
 import { permissionCatalog } from "../../services/authorization.js";
 
 export function createDirectorySlice({ state, persist, nextLocalId, changeDetails, audit }) {
@@ -6,10 +7,10 @@ export function createDirectorySlice({ state, persist, nextLocalId, changeDetail
       const normalizedEmail = user.email.trim().toLowerCase();
       const normalizedUsername = user.username.trim().toLowerCase();
       if (state.users.some((item) => item.email.toLowerCase() === normalizedEmail)) {
-        return { ok: false, message: "Bu e-posta adresi zaten kullanılıyor." };
+        return { ok: false, message: t("store.emailInUse") };
       }
       if (state.users.some((item) => item.username.toLowerCase() === normalizedUsername)) {
-        return { ok: false, message: "Bu kullanıcı adı zaten kullanılıyor." };
+        return { ok: false, message: t("store.usernameInUse") };
       }
       state.users.push({
         ...user,
